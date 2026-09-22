@@ -6,8 +6,6 @@
     <title>TV Dashboard - Kecemasan HKN</title>
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
-    <!-- Twitter/X Widget Script -->
-    <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
     
     <style>
         /* Tetapan Asas & Pembolehubah Warna */
@@ -194,7 +192,7 @@
             gap: 12px;
         }
 
-        /* BAHAGIAN ATAS: Video (60%), Kad Twitter KKM (20%) & Staf (20%) */
+        /* BAHAGIAN ATAS: Video (60%), Kad Facebook HKN (20%) & Staf (20%) */
         .top-section {
             height: 58vh;
             display: flex;
@@ -234,8 +232,8 @@
             z-index: 20;
         }
 
-        /* KAD TWITTER / X KKM */
-        .twitter-card {
+        /* KAD FACEBOOK HOSPITAL KUALA NERANG */
+        .facebook-card {
             width: 20%;
             background-color: var(--bg-card-dark);
             border-radius: 12px;
@@ -247,19 +245,28 @@
             overflow: hidden;
         }
 
-        .twitter-card .panel-title {
+        .facebook-card .panel-title {
             color: var(--hospital-blue);
             border-bottom-color: rgba(144, 224, 239, 0.4);
             margin-bottom: 6px;
             flex-shrink: 0;
         }
 
-        .twitter-feed-container {
+        .facebook-feed-container {
             flex: 1;
             width: 100%;
-            overflow-y: auto;
+            overflow: hidden;
             border-radius: 8px;
             background: #ffffff;
+            display: flex;
+            justify-content: center;
+        }
+
+        .facebook-feed-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 8px;
         }
 
         .staff-card {
@@ -424,7 +431,6 @@
             animation: pulse-red 2s infinite;
         }
         
-        /* TULISAN ZON KUNING DIUBAH KEPADA WARNA PUTIH */
         .bg-yellow { 
             background-color: var(--zone-yellow); 
             color: #ffffff; 
@@ -571,16 +577,16 @@
                 <div class="audio-indicator" id="audio-indicator">🔊 Sedang Memainkan Bacaan Al-Quran...</div>
             </div>
 
-            <!-- KAD TWITTER / X KKM -->
-            <div class="twitter-card">
-                <div class="panel-title">📱 TWITTER @KKMPUTRAJAYA</div>
-                <div class="twitter-feed-container" id="twitter-feed-box">
-                    <a class="twitter-timeline" 
-                       data-height="100%" 
-                       data-chrome="noheader nofooter noborders transparent" 
-                       href="https://twitter.com/KKMPutrajaya?ref_src=twsrc%5Etfw">
-                       Memuat turun hantaran KKM...
-                    </a>
+            <!-- KAD FACEBOOK HOSPITAL KUALA NERANG -->
+            <div class="facebook-card">
+                <div class="panel-title">👍 FACEBOOK HKN</div>
+                <div class="facebook-feed-container">
+                    <iframe src="https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2Fshare%2F199ijRaqcr%2F&tabs=timeline&width=300&height=500&small_header=true&adapt_container_width=true&hide_cover=false&show_facepile=false" 
+                            scrolling="no" 
+                            frameborder="0" 
+                            allowfullscreen="true" 
+                            allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share">
+                    </iframe>
                 </div>
             </div>
 
