@@ -75,7 +75,7 @@
             animation: pulse 1.5s infinite;
         }
 
-        /* 1. HEADER (9vh) */
+        /* 1. HEADER DENGAN LOGO (9vh) */
         header {
             height: 9vh;
             background-color: var(--bg-card);
@@ -83,21 +83,38 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 30px;
+            padding: 0 25px;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
             z-index: 10;
         }
 
+        .header-title-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header-logo {
+            height: 52px;
+            width: auto;
+            object-fit: contain;
+            background: #ffffff;
+            padding: 3px;
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+        }
+
         .header-title h1 {
-            font-size: 1.8rem;
+            font-size: 1.7rem;
             font-weight: 900;
             letter-spacing: 1px;
             color: var(--bright-red);
             text-shadow: 0 0 10px var(--bright-red-glow);
+            line-height: 1.1;
         }
 
         .header-title p {
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 2px;
@@ -116,7 +133,7 @@
         }
 
         .clock-date {
-            font-size: 1rem;
+            font-size: 0.95rem;
             color: var(--text-main);
             font-weight: 600;
         }
@@ -147,9 +164,11 @@
             position: relative;
         }
 
-        video {
+        /* PEMAIN VIDEO & IFRAME GOOGLE DRIVE */
+        .video-box iframe, .video-box video {
             width: 100%;
             height: 100%;
+            border: none;
             object-fit: cover;
         }
 
@@ -412,11 +431,14 @@
     <audio id="audio-quran"></audio>
     <audio id="audio-azan"></audio>
 
-    <!-- HEADER -->
+    <!-- HEADER DENGAN LOGO -->
     <header>
-        <div class="header-title">
-            <h1>UNIT KECEMASAN DAN TRAUMA</h1>
-            <p>Hospital Kuala Nerang, Kedah</p>
+        <div class="header-title-container">
+            <img src="https://lh3.googleusercontent.com/d/1H9tWnlDLzJpuH8iLClw2zbRIRF0FXqtK" alt="Logo KKM" class="header-logo" onerror="this.style.display='none'">
+            <div class="header-title">
+                <h1>UNIT KECEMASAN DAN TRAUMA</h1>
+                <p>Hospital Kuala Nerang, Kedah</p>
+            </div>
         </div>
         <div class="datetime-container">
             <div class="clock-time" id="clock-time">00:00:00 AM</div>
@@ -428,9 +450,9 @@
     <main>
         <!-- BAHAGIAN ATAS: Video (60%), Solat (20%), Staf (20%) -->
         <div class="top-section">
-            <!-- Video -->
-            <div class="video-box">
-                <video id="main-video" autoplay muted playsinline></video>
+            <!-- Video Container -->
+            <div class="video-box" id="video-box">
+                <!-- Video / Iframe dimuatkan secara dinamik oleh JS -->
                 <div class="audio-indicator" id="audio-indicator">🔊 Sedang Memainkan Bacaan Al-Quran...</div>
             </div>
 
@@ -525,7 +547,6 @@
         };
 
         let prayerTimesData = {};
-        const videoPlayer = document.getElementById('main-video');
         const audioQuran = document.getElementById('audio-quran');
         const audioAzan = document.getElementById('audio-azan');
         const audioIndicator = document.getElementById('audio-indicator');
@@ -533,12 +554,12 @@
         let currentVideoIndex = 0;
         let isSpecialAudioPlaying = false; 
         let isAudioUnlocked = false;
-        let lastDataString = ""; // Menyimpan cache data untuk semakan perubahan
+        let lastDataString = "";
 
         function enableAudioSystem() {
             isAudioUnlocked = true;
             document.getElementById('audio-overlay').style.display = 'none';
-            videoPlayer.play();
+            playCurrentVideo();
             audioQuran.play().then(() => audioQuran.pause()).catch(() => {});
             audioAzan.play().then(() => audioAzan.pause()).catch(() => {});
         }
@@ -547,16 +568,14 @@
         async function fetchDashboardData() {
             try {
                 if(GAS_WEB_APP_URL && !GAS_WEB_APP_URL.includes("INSERT_YOUR")) {
-                    const res = await fetch(`${GAS_WEB_APP_URL}?t=${new Date().getTime()}`); // Cache-busting
+                    const res = await fetch(`${GAS_WEB_APP_URL}?t=${new Date().getTime()}`);
                     const data = await res.json();
                     
                     if(data) {
                         const newString = JSON.stringify(data);
-                        // Hanya kemaskini UI jika ada perubahan dikesan pada Google Sheet
                         if (newString !== lastDataString) {
                             lastDataString = newString;
                             
-                            // Kemaskini data video jika ada senarai baharu
                             let isVideoChanged = JSON.stringify(dashboardData.videos) !== JSON.stringify(data.videos);
                             dashboardData = Object.assign(dashboardData, data);
                             
@@ -656,7 +675,7 @@
                     if(audioAzan.currentTime > 0 && !audioAzan.paused) return; 
 
                     if (audioQuran.paused && !isSpecialAudioPlaying) {
-                        videoPlayer.pause();
+                        pauseCurrentVideo();
                         isSpecialAudioPlaying = true;
                         audioIndicator.style.display = "block";
                         audioIndicator.textContent = `🔊 Bacaan Al-Quran Sebelum ${solat}`;
@@ -669,7 +688,7 @@
                     inPrayerPhase = true;
                     audioQuran.pause();
                     audioQuran.currentTime = 0;
-                    videoPlayer.pause();
+                    pauseCurrentVideo();
                     isSpecialAudioPlaying = true;
                     
                     audioIndicator.style.display = "block";
@@ -691,22 +710,61 @@
         function resetToVideoNormal() {
             isSpecialAudioPlaying = false;
             audioIndicator.style.display = "none";
-            videoPlayer.play();
+            playCurrentVideo();
         }
 
         audioAzan.onended = () => { resetToVideoNormal(); };
 
+        // 4. PEMAIN VIDEO (SOKONGAN HYBRID MP4 & GOOGLE DRIVE IFRAME)
+        function extractDriveId(url) {
+            if(!url) return null;
+            let match = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
+            return match ? match[1] : null;
+        }
+
         function initVideoPlaylist() {
-            if(dashboardData.videos && dashboardData.videos.length > 0) {
-                videoPlayer.src = dashboardData.videos[currentVideoIndex];
-                if(!isSpecialAudioPlaying && isAudioUnlocked) videoPlayer.play();
+            if(!dashboardData.videos || dashboardData.videos.length === 0) return;
+            playCurrentVideo();
+        }
+
+        function playCurrentVideo() {
+            if(isSpecialAudioPlaying || !isAudioUnlocked) return;
+            
+            const box = document.getElementById('video-box');
+            let currentUrl = dashboardData.videos[currentVideoIndex];
+            if(!currentUrl) return;
+
+            let driveId = extractDriveId(currentUrl);
+
+            if (driveId) {
+                // Jika pautan Google Drive, gunakan IFRAME Preview
+                box.innerHTML = `
+                    <iframe id="drive-iframe" src="https://drive.google.com/file/d/${driveId}/preview?autoplay=1" allow="autoplay"></iframe>
+                    <div class="audio-indicator" id="audio-indicator">🔊 Sedang Memainkan Bacaan Al-Quran...</div>
+                `;
+            } else {
+                // Jika pautan MP4 biasa, gunakan HTML5 Video Tag
+                box.innerHTML = `
+                    <video id="main-video" autoplay muted playsinline style="width:100%; height:100%; object-fit:cover;">
+                        <source src="${currentUrl}" type="video/mp4">
+                    </video>
+                    <div class="audio-indicator" id="audio-indicator">🔊 Sedang Memainkan Bacaan Al-Quran...</div>
+                `;
                 
-                videoPlayer.onended = () => {
-                    currentVideoIndex = (currentVideoIndex + 1) % dashboardData.videos.length;
-                    videoPlayer.src = dashboardData.videos[currentVideoIndex];
-                    if(!isSpecialAudioPlaying && isAudioUnlocked) videoPlayer.play();
-                };
+                const vid = document.getElementById('main-video');
+                if(vid) {
+                    vid.play().catch(e => {});
+                    vid.onended = () => {
+                        currentVideoIndex = (currentVideoIndex + 1) % dashboardData.videos.length;
+                        playCurrentVideo();
+                    };
+                }
             }
+        }
+
+        function pauseCurrentVideo() {
+            const vid = document.getElementById('main-video');
+            if(vid) vid.pause();
         }
 
         let combinedRotatorItems = [];
@@ -773,7 +831,7 @@
             
             setInterval(updateClockAndLogic, 1000);   // Kemaskini jam & logik azan setiap 1 saat
             setInterval(rotateContent, 15000);        // Rotasi pengumuman & Quran setiap 15 saat
-            setInterval(fetchDashboardData, 5000);    // AUTO-SYNC GOOGLE SHEETS SETIAP 5 SAAT
+            setInterval(fetchDashboardData, 5000);    // Auto-sync Google Sheets setiap 5 saat
             
             setInterval(async () => {
                 const h = new Date().getHours();
