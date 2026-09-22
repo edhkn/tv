@@ -10,11 +10,14 @@
     <style>
         /* Tetapan Asas & Pembolehubah Warna */
         :root {
-            --bg-main: #0b0f19;
-            --bg-card: #1e293b;
+            /* WARNA BACKGROUND BIRU MUDA PKR */
+            --bg-main: #00b4d8; 
+            --bg-card: #0077b6; 
+            --bg-card-dark: #03045e;
+            
             --text-main: #ffffff;
-            --text-muted: #94a3b8;
-            --hospital-blue: #38bdf8;
+            --text-muted: #e0f2fe;
+            --hospital-blue: #90e0ef;
             --islamic-green: #064e3b;
             --islamic-gold: #fbbf24;
             
@@ -23,9 +26,9 @@
             --bright-red-glow: rgba(255, 0, 51, 0.6);
             
             --zone-yellow: #eab308;
-            --zone-green: #22c55e;
-            --zone-asthma: #3b82f6;
-            --zone-obs: #8b5cf6;
+            --zone-green: #10b981;
+            --zone-asthma: #0284c7;
+            --zone-obs: #7c3aed;
         }
 
         * {
@@ -49,13 +52,13 @@
         #audio-overlay {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(11, 15, 25, 0.95);
+            background: rgba(0, 119, 182, 0.95);
             z-index: 999;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            color: var(--bright-red);
+            color: #ffffff;
             cursor: pointer;
             text-align: center;
             padding: 20px;
@@ -78,13 +81,13 @@
         /* 1. HEADER DENGAN LOGO (9vh) */
         header {
             height: 9vh;
-            background-color: var(--bg-card);
-            border-bottom: 3px solid var(--bright-red);
+            background-color: var(--bg-card-dark);
+            border-bottom: 4px solid var(--bright-red);
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 0 25px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
             z-index: 10;
         }
 
@@ -101,7 +104,7 @@
             background: #ffffff;
             padding: 3px;
             border-radius: 50%;
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
         }
 
         .header-title h1 {
@@ -159,13 +162,12 @@
             background-color: #000;
             border-radius: 12px;
             overflow: hidden;
-            border: 2px solid var(--bright-red);
-            box-shadow: 0 0 15px var(--bright-red-glow);
+            border: 3px solid var(--bg-card-dark);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
             position: relative;
         }
 
-        /* PEMAIN VIDEO & IFRAME GOOGLE DRIVE */
-        .video-box iframe, .video-box video {
+        .video-box video {
             width: 100%;
             height: 100%;
             border: none;
@@ -193,7 +195,7 @@
             background-color: var(--islamic-green);
             border-radius: 12px;
             padding: 15px;
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
             border: 2px solid var(--islamic-gold);
             display: flex;
             flex-direction: column;
@@ -201,10 +203,10 @@
 
         .staff-card {
             width: 20%;
-            background-color: var(--bg-card);
+            background-color: var(--bg-card-dark);
             border-radius: 12px;
             padding: 15px;
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
             border-top: 4px solid var(--bright-red);
             display: flex;
             flex-direction: column;
@@ -237,7 +239,7 @@
         .prayer-item {
             display: flex;
             justify-content: space-between;
-            background: rgba(0, 0, 0, 0.25);
+            background: rgba(0, 0, 0, 0.3);
             padding: 8px 12px;
             border-radius: 6px;
             font-size: 1rem;
@@ -265,14 +267,14 @@
         }
 
         .staff-item {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.08);
             padding: 8px 10px;
             border-radius: 8px;
             border-left: 4px solid var(--bright-red);
         }
 
         .staff-role { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; }
-        .staff-name { font-size: 0.95rem; font-weight: 800; color: #f1f5f9; margin-top: 2px; }
+        .staff-name { font-size: 0.95rem; font-weight: 800; color: #ffffff; margin-top: 2px; }
 
         /* BAHAGIAN BAWAH: Status Pesakit (65%) & Rotasi Pengumuman/Al-Quran (35%) */
         .bottom-section {
@@ -283,10 +285,10 @@
 
         .status-panel {
             width: 65%;
-            background-color: var(--bg-card);
+            background-color: var(--bg-card-dark);
             border-radius: 12px;
             padding: 12px 15px;
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
             display: flex;
             flex-direction: column;
             border: 2px solid var(--bright-red);
@@ -319,7 +321,7 @@
             border-radius: 10px;
             font-weight: 900;
             color: white;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
             text-align: center;
         }
 
@@ -340,10 +342,10 @@
 
         .rotator-panel {
             width: 35%;
-            background-color: var(--bg-card);
+            background-color: var(--bg-card-dark);
             border-radius: 12px;
             padding: 15px;
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
             position: relative;
             overflow: hidden;
             border-left: 5px solid var(--bright-red);
@@ -380,7 +382,7 @@
             font-size: 1.1rem;
             line-height: 1.4;
             font-weight: 700;
-            color: #f8fafc;
+            color: #ffffff;
         }
 
         .quran-arabic {
@@ -394,7 +396,7 @@
 
         .quran-bm {
             font-size: 0.95rem;
-            color: #cbd5e1;
+            color: #e0f2fe;
             font-style: italic;
         }
 
@@ -452,7 +454,7 @@
         <div class="top-section">
             <!-- Video Container -->
             <div class="video-box" id="video-box">
-                <!-- Video / Iframe dimuatkan secara dinamik oleh JS -->
+                <video id="main-video" autoplay muted playsinline></video>
                 <div class="audio-indicator" id="audio-indicator">🔊 Sedang Memainkan Bacaan Al-Quran...</div>
             </div>
 
@@ -547,6 +549,7 @@
         };
 
         let prayerTimesData = {};
+        const videoPlayer = document.getElementById('main-video');
         const audioQuran = document.getElementById('audio-quran');
         const audioAzan = document.getElementById('audio-azan');
         const audioIndicator = document.getElementById('audio-indicator');
@@ -564,7 +567,6 @@
             audioAzan.play().then(() => audioAzan.pause()).catch(() => {});
         }
 
-        // 1. DATA FETCHING DENGAN AUTO-SYNC DARI GOOGLE SHEETS
         async function fetchDashboardData() {
             try {
                 if(GAS_WEB_APP_URL && !GAS_WEB_APP_URL.includes("INSERT_YOUR")) {
@@ -715,7 +717,6 @@
 
         audioAzan.onended = () => { resetToVideoNormal(); };
 
-        // 4. PEMAIN VIDEO (SOKONGAN HYBRID MP4 & GOOGLE DRIVE IFRAME)
         function extractDriveId(url) {
             if(!url) return null;
             let match = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
@@ -730,41 +731,39 @@
         function playCurrentVideo() {
             if(isSpecialAudioPlaying || !isAudioUnlocked) return;
             
-            const box = document.getElementById('video-box');
             let currentUrl = dashboardData.videos[currentVideoIndex];
             if(!currentUrl) return;
 
             let driveId = extractDriveId(currentUrl);
+            
+            let streamUrl = driveId 
+                ? `https://drive.google.com/uc?export=download&id=${driveId}` 
+                : currentUrl;
 
-            if (driveId) {
-                // Jika pautan Google Drive, gunakan IFRAME Preview
-                box.innerHTML = `
-                    <iframe id="drive-iframe" src="https://drive.google.com/file/d/${driveId}/preview?autoplay=1" allow="autoplay"></iframe>
-                    <div class="audio-indicator" id="audio-indicator">🔊 Sedang Memainkan Bacaan Al-Quran...</div>
-                `;
-            } else {
-                // Jika pautan MP4 biasa, gunakan HTML5 Video Tag
-                box.innerHTML = `
-                    <video id="main-video" autoplay muted playsinline style="width:100%; height:100%; object-fit:cover;">
-                        <source src="${currentUrl}" type="video/mp4">
-                    </video>
-                    <div class="audio-indicator" id="audio-indicator">🔊 Sedang Memainkan Bacaan Al-Quran...</div>
-                `;
-                
-                const vid = document.getElementById('main-video');
-                if(vid) {
-                    vid.play().catch(e => {});
-                    vid.onended = () => {
-                        currentVideoIndex = (currentVideoIndex + 1) % dashboardData.videos.length;
-                        playCurrentVideo();
-                    };
-                }
-            }
+            videoPlayer.src = streamUrl;
+            videoPlayer.play().catch(e => {
+                console.warn("Gagal memainkan video, mencuba video seterusnya...", e);
+                nextVideo();
+            });
+
+            videoPlayer.onended = () => {
+                nextVideo();
+            };
+
+            videoPlayer.onerror = () => {
+                console.warn("Ralat fail video. Lompat ke video seterusnya.");
+                setTimeout(nextVideo, 2000);
+            };
+        }
+
+        function nextVideo() {
+            if(!dashboardData.videos || dashboardData.videos.length === 0) return;
+            currentVideoIndex = (currentVideoIndex + 1) % dashboardData.videos.length;
+            playCurrentVideo();
         }
 
         function pauseCurrentVideo() {
-            const vid = document.getElementById('main-video');
-            if(vid) vid.pause();
+            if(videoPlayer) videoPlayer.pause();
         }
 
         let combinedRotatorItems = [];
@@ -829,9 +828,9 @@
             await fetchPrayerTimes();
             await fetchDashboardData();
             
-            setInterval(updateClockAndLogic, 1000);   // Kemaskini jam & logik azan setiap 1 saat
-            setInterval(rotateContent, 15000);        // Rotasi pengumuman & Quran setiap 15 saat
-            setInterval(fetchDashboardData, 5000);    // Auto-sync Google Sheets setiap 5 saat
+            setInterval(updateClockAndLogic, 1000);   // Jam & Azan
+            setInterval(rotateContent, 15000);        // Rotasi Pengumuman / Quran
+            setInterval(fetchDashboardData, 5000);    // Auto Sync Google Sheets
             
             setInterval(async () => {
                 const h = new Date().getHours();
