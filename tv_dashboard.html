@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TV Dashboard - Kecemasan HKN</title>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-main: #0f172a; 
+            --bg-card: #1e293b;
+            --text-main: #ffffff;
+            --text-muted: #94a3b8;
+            --hospital-blue: #38bdf8;
+            --islamic-green: #064e3b;
+            --islamic-gold: #fbbf24;
+            --zone-red: #dc2626;
+            --zone-yellow: #eab308;
+            --zone-green: #22c55e;
+            --zone-asthma: #3b82f6;
+            --zone-obs: #8b5cf6;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden; /* Prevent scrolling on TV screen */
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            height: 10vh;
+            background-color: var(--bg-card);
+            border-bottom: 3px solid var(--hospital-blue);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 30px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+            z-index: 10;
+        }
+
+        .header-title h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            color: var(--hospital-blue);
+        }
+
+        .header-title p {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .datetime-container {
+            text-align: right;
+        }
+
+        .clock-time {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--islamic-gold);
+            line-height: 1.1;
+        }
+
+        .clock-date {
+            font-size: 1.2rem;
+            color: var(--text-main);
+        }
+
+        main {
+            height: 75vh;
+            display: flex;
+            padding: 20px;
+            gap: 20px;
+        }
+
+        /* Left Panel: Video Player (60%) */
+        .left-panel {
+            width: 60%;
+            background-color: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid var(--bg-card);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+            position: relative;
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .audio-indicator {
+            position: absolute;
+            top: 20px; right: 20px;
+            background: rgba(0,0,0,0.85);
+            padding: 12px 24px;
+            border-radius: 8px;
+            color: var(--islamic-gold);
+            font-weight: 800;
+            font-size: 1.2rem;
+            display: none;
+            animation: pulse 2s infinite;
+            border: 1px solid var(--islamic-gold);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            z-index: 20;
+        }
+
+        /* Center Panel: Rotating Info & Patient Status (20%) */
+        .center-panel {
+            width: 20%;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .rotator-container {
+            flex: 1;
+            background-color: var(--bg-card);
+            border-radius: 12px;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+        }
+
+        .slide-item {
+            position: absolute;
+            top: 20px; left: 20px; right: 20px; bottom: 20px;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .slide-item.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .status-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            height: 100%;
+            justify-content: space-around;
+        }
+
+        .status-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: 800;
+            font-size: 1.3rem;
+            color: white;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        .bg-red { background-color: var(--zone-red); }
+        .bg-yellow { background-color: var(--zone-yellow); color: #111; text-shadow: none;}
+        .bg-green { background-color: var(--zone-green); }
+        .bg-asthma { background-color: var(--zone-asthma); }
+        .bg-obs { background-color: var(--zone-obs); }
+
+        .announcement-box {
+            text-align: center;
+        }
+        .announcement-box h2 { color: var(--hospital-blue); margin-bottom: 20px; font-size: 1.6rem; font-weight: 800; }
+        .announcement-box p { font-size: 1.4rem; line-height: 1.6; font-weight: 600; color: #e2e8f0; }
+
+        /* Right Panel: Prayer Times & Staff (20%) */
+        .right-panel {
+            width: 20%;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .prayer-card, .staff-card {
+            background-color: var(--bg-card);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+        }
+
+        .prayer-card {
+            flex: 1.2;
+            background-color: var(--islamic-green);
+            border: 2px solid var(--islamic-gold);
+        }
+
+        .panel-title {
+            text-align: center;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            font-weight: 800;
+            margin-bottom: 12px;
+            color: var(--islamic-gold);
+            border-bottom: 1px solid rgba(251, 191, 36, 0.3);
+            padding-bottom: 10px;
+        }
+
+        .prayer-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .prayer-item {
+            display: flex;
+            justify-content: space-between;
+            background: rgba(0, 0, 0, 0.25);
+            padding: 10px 15px;
+            border-radius: 6px;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .staff-card {
+            flex: 1;
+            border-top: 4px solid var(--hospital-blue);
+        }
+
+        .staff-card .panel-title {
+            color: var(--hospital-blue);
+            border-bottom-color: rgba(56, 189, 248, 0.3);
+        }
+        
+        .shift-badge {
+            display: inline-block;
+            background: var(--hospital-blue);
+            color: #0f172a;
+            padding: 2px 10px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            margin-left: 10px;
+            vertical-align: middle;
+            font-weight: 800;
+        }
+
+        .staff-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .staff-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 4px solid var(--hospital-blue);
+        }
+
+        .staff-role { font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; }
+        .staff-name { font-size: 1.1rem; font-weight: 800; margin-top: 5px; color: #e2e8f0; }
+
+        /* Footer (Quran Verses) */
+        footer {
+            height: 15vh;
+            background-color: var(--bg-card);
+            border-top: 2px solid var(--islamic-green);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 50px;
+            box-shadow: 0 -4px 10px rgba(0,0,0,0.3);
+        }
+
+        .quran-slide {
+            position: absolute;
+            width: 90%;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .quran-slide.active {
+            opacity: 1;
+        }
+
+        .quran-arabic {
+            font-family: 'Amiri', serif;
+            font-size: 2.5rem;
+            color: var(--islamic-gold);
+            line-height: 1.5;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+        }
+
+        .quran-bm {
+            font-size: 1.3rem;
+            color: #cbd5e1;
+            font-style: italic;
+        }
+
+        /* Animations */
+        @keyframes blink {
+            0%, 100% { opacity: 1; background-color: var(--islamic-gold); color: #000; box-shadow: 0 0 10px var(--islamic-gold); }
+            50% { opacity: 0.3; background-color: rgba(251, 191, 36, 0.2); color: var(--text-main); box-shadow: none; }
+        }
+        .blinking { animation: blink 1.5s infinite; border-radius: 6px; }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Hidden Audio Elements (Must be in same directory for production playback) -->
+    <audio id="audio-quran"></audio>
+    <audio id="audio-azan"></audio>
+
+    <!-- HEADER -->
+    <header>
+        <div class="header-title">
+            <h1>UNIT KECEMASAN DAN TRAUMA</h1>
+            <p>Hospital Kuala Nerang, Kedah</p>
+        </div>
+        <div class="datetime-container">
+            <div class="clock-time" id="clock-time">00:00:00 AM</div>
+            <div class="clock-date" id="clock-date">-- -- ----</div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main>
+        <!-- Left: Video Playlist -->
+        <div class="left-panel">
+            <video id="main-video" autoplay muted></video>
+            <div class="audio-indicator" id="audio-indicator">🔊 Sedang Memainkan Bacaan Al-Quran...</div>
+        </div>
+
+        <!-- Center: Patient Status & Announcements -->
+        <div class="center-panel">
+            <div class="rotator-container" id="center-rotator">
+                <!-- Slide 1: Patient Status -->
+                <div class="slide-item active" id="slide-status">
+                    <div style="text-align:center; color:var(--hospital-blue); margin-bottom:15px; font-weight:800; font-size: 1.1rem; letter-spacing: 1px;">STATUS SEMASA PESAKIT</div>
+                    <div class="status-grid">
+                        <div class="status-card bg-red">
+                            <span>ZON MERAH</span><span id="val-red">0</span>
+                        </div>
+                        <div class="status-card bg-yellow">
+                            <span>ZON KUNING</span><span id="val-yellow">0</span>
+                        </div>
+                        <div class="status-card bg-green">
+                            <span>ZON HIJAU</span><span id="val-green">0</span>
+                        </div>
+                        <div class="status-card bg-asthma">
+                            <span>ASTHMA BAY</span><span id="val-asthma">0</span>
+                        </div>
+                        <div class="status-card bg-obs">
+                            <span>OBSERVATION</span><span id="val-obs">0</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Dynamic Announcement slides injected via JS -->
+            </div>
+        </div>
+
+        <!-- Right: Prayers & Staff -->
+        <div class="right-panel">
+            <!-- Prayer Times -->
+            <div class="prayer-card">
+                <div class="panel-title">Waktu Solat KDH03</div>
+                <div class="prayer-list" id="prayer-list">
+                    <div class="prayer-item" id="prayer-Subuh"><span>Subuh</span><span class="time">-</span></div>
+                    <div class="prayer-item" id="prayer-Syuruk"><span>Syuruk</span><span class="time">-</span></div>
+                    <div class="prayer-item" id="prayer-Zohor"><span>Zohor</span><span class="time">-</span></div>
+                    <div class="prayer-item" id="prayer-Asar"><span>Asar</span><span class="time">-</span></div>
+                    <div class="prayer-item" id="prayer-Maghrib"><span>Maghrib</span><span class="time">-</span></div>
+                    <div class="prayer-item" id="prayer-Isyak"><span>Isyak</span><span class="time">-</span></div>
+                </div>
+            </div>
+
+            <!-- Staff On Duty -->
+            <div class="staff-card">
+                <div class="panel-title">Pegawai Bertugas <span class="shift-badge" id="current-shift-badge">PAGI</span></div>
+                <div class="staff-list">
+                    <div class="staff-item">
+                        <div class="staff-role">Pegawai Perubatan (MO)</div>
+                        <div class="staff-name" id="staff-mo">-</div>
+                    </div>
+                    <div class="staff-item">
+                        <div class="staff-role">Penolong Pegawai Perubatan (MA)</div>
+                        <div class="staff-name" id="staff-ma">-</div>
+                    </div>
+                    <div class="staff-item">
+                        <div class="staff-role">Jururawat Bertugas (SN)</div>
+                        <div class="staff-name" id="staff-sn">-</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer id="quran-footer">
+        <!-- Dynamic Quran slides injected via JS -->
+    </footer>
+
+    <script>
+        // --- 1. CONFIGURATION & FALLBACK DATA ---
+        // Replace this URL with your actual Google Apps Script Web App URL
+        const GAS_WEB_APP_URL = "INSERT_YOUR_GAS_WEB_APP_URL_HERE"; 
+        
+        let dashboardData = {
+            patients: { red: 3, yellow: 8, green: 15, asthma: 2, observation: 5 },
+            announcements: [
+                "Hanya SATU (1) waris dibenarkan menemani pesakit di kawasan rawatan.",
+                "Sila pakai pelitup muka sepanjang berada di dalam kawasan Kecemasan.",
+                "Keutamaan rawatan bergantung pada tahap kritikal kecederaan (Zon Merah)."
+            ],
+            staff: {
+                pagi: { mo: "Dr. Ahmad Farhan", ma: "En. Khairul", sn: "SN Siti Nurhaliza" },
+                petang: { mo: "Dr. Wong Wei Kit", ma: "En. Muthu", sn: "SN Aisyah" },
+                malam: { mo: "Dr. Sarah", ma: "En. Chong", sn: "SN Aminah" }
+            },
+            videos: [
+                "https://www.w3schools.com/html/mov_bbb.mp4" 
+            ],
+            quran: [
+                { arabic: "وَإِذَا مَرِضْتُ فَهُوَ يَشْفِينِ", bm: "Dan apabila aku sakit, Dialah yang menyembuhkan aku. (Asy-Syu'ara: 80)" },
+                { arabic: "فَإِنَّ مَعَ الْعُسْرِ يُسْرًا", bm: "Maka sesungguhnya bersama kesulitan itu ada kemudahan. (Al-Insyirah: 5)" },
+                { arabic: "لَا يُكَلِّفُ اللَّهُ نَفْسًا إِلَّا وُسْعَهَا", bm: "Allah tidak membebani seseorang melainkan sesuai dengan kesanggupannya. (Al-Baqarah: 286)" }
+            ]
+        };
+
+        let prayerTimesData = {};
+        const videoPlayer = document.getElementById('main-video');
+        const audioQuran = document.getElementById('audio-quran');
+        const audioAzan = document.getElementById('audio-azan');
+        const audioIndicator = document.getElementById('audio-indicator');
+        
+        let currentVideoIndex = 0;
+        let isSpecialAudioPlaying = false; 
+
+        // --- 2. DATA FETCHING ---
+        async function fetchDashboardData() {
+            try {
+                if(GAS_WEB_APP_URL !== "INSERT_YOUR_GAS_WEB_APP_URL_HERE") {
+                    const res = await fetch(GAS_WEB_APP_URL);
+                    const data = await res.json();
+                    if(data) dashboardData = Object.assign(dashboardData, data);
+                }
+                updateDashboardUI();
+                initVideoPlaylist();
+            } catch (error) {
+                console.warn("Failed to fetch Google Sheets data. Using default fallback data.", error);
+                updateDashboardUI();
+                initVideoPlaylist();
+            }
+        }
+
+        async function fetchPrayerTimes() {
+            try {
+                // Aladhan API: Method 11 = JAKIM, City = Padang Terap, State = Kedah
+                const res = await fetch("https://api.aladhan.com/v1/timingsByCity?city=Padang+Terap&country=Malaysia&method=11");
+                const json = await res.json();
+                const times = json.data.timings;
+                
+                prayerTimesData = {
+                    Subuh: times.Fajr,
+                    Syuruk: times.Sunrise,
+                    Zohor: times.Dhuhr,
+                    Asar: times.Asr,
+                    Maghrib: times.Maghrib,
+                    Isyak: times.Isha
+                };
+
+                for (let solat in prayerTimesData) {
+                    const el = document.getElementById(`prayer-${solat}`);
+                    if(el) {
+                        el.querySelector('.time').textContent = formatTime12(prayerTimesData[solat]);
+                    }
+                }
+            } catch (error) {
+                console.warn("Failed to fetch Prayer Times API.", error);
+            }
+        }
+
+        // --- 3. HELPER FUNCTIONS & LOGIC ---
+        function formatTime12(time24) {
+            let [h, m] = time24.split(':');
+            let hour = parseInt(h);
+            let ampm = hour >= 12 ? 'PM' : 'AM';
+            hour = hour % 12 || 12; // Handle 00:00 as 12
+            return `${hour}:${m} ${ampm}`;
+        }
+
+        function updateClockAndLogic() {
+            const now = new Date();
+            
+            // UI Update Clock
+            document.getElementById('clock-time').textContent = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true });
+            document.getElementById('clock-date').textContent = now.toLocaleDateString('ms-MY', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+            // Staff Shift Calculation
+            const h = now.getHours();
+            let shift = 'malam'; // 10 PM - 8 AM
+            if (h >= 8 && h < 15) shift = 'pagi'; // 8 AM - 3 PM
+            else if (h >= 15 && h < 22) shift = 'petang'; // 3 PM - 10 PM
+            
+            document.getElementById('current-shift-badge').textContent = shift.toUpperCase();
+            document.getElementById('staff-mo').textContent = dashboardData.staff[shift].mo;
+            document.getElementById('staff-ma').textContent = dashboardData.staff[shift].ma;
+            document.getElementById('staff-sn').textContent = dashboardData.staff[shift].sn;
+
+            // Audio & Prayer Blink check
+            checkAudioLogic(now);
+        }
+
+        function checkAudioLogic(now) {
+            if(Object.keys(prayerTimesData).length === 0) return;
+
+            const nowInSeconds = (now.getHours() * 3600) + (now.getMinutes() * 60) + now.getSeconds();
+            let inPrayerPhase = false;
+
+            for (let solat in prayerTimesData) {
+                if (solat === 'Syuruk') continue; // Skip Syuruk azan
+
+                let [pH, pM] = prayerTimesData[solat].split(':');
+                const prayerInSeconds = (parseInt(pH) * 3600) + (parseInt(pM) * 60);
+                const diffSeconds = prayerInSeconds - nowInSeconds;
+                const prayerDiv = document.getElementById(`prayer-${solat}`);
+
+                // Active Blink Indicator (5 minutes before and 5 minutes after) = 300 seconds
+                if (diffSeconds <= 300 && diffSeconds >= -300) {
+                    if(!prayerDiv.classList.contains('blinking')) prayerDiv.classList.add('blinking');
+                } else {
+                    prayerDiv.classList.remove('blinking');
+                }
+
+                // 10 minutes before exact time -> Quran audio
+                if (diffSeconds <= 600 && diffSeconds > 0) {
+                    inPrayerPhase = true;
+                    if(audioAzan.currentTime > 0) return; // Azan is running, let it be
+                    
+                    if (audioQuran.paused && !isSpecialAudioPlaying) {
+                        videoPlayer.pause();
+                        isSpecialAudioPlaying = true;
+                        audioIndicator.style.display = "block";
+                        audioIndicator.textContent = `🔊 Bacaan Al-Quran Sebelum ${solat}`;
+                        
+                        audioQuran.src = `quran_${solat.toLowerCase()}.mp3`; 
+                        let playPromise = audioQuran.play();
+                        if (playPromise !== undefined) {
+                            playPromise.catch(e => { console.log("Missing Quran mp3, silent mode."); });
+                        }
+                    }
+                }
+                // Exact time -> Azan audio
+                else if (diffSeconds === 0) {
+                    inPrayerPhase = true;
+                    audioQuran.pause();
+                    audioQuran.currentTime = 0;
+                    videoPlayer.pause();
+                    isSpecialAudioPlaying = true;
+                    
+                    audioIndicator.style.display = "block";
+                    audioIndicator.textContent = `🔊 Azan ${solat}`;
+
+                    audioAzan.src = solat === 'Subuh' ? 'azan_subuh.mp3' : 'azan_lain.mp3';
+                    let playPromise = audioAzan.play();
+                    if (playPromise !== undefined) {
+                        playPromise.catch(e => { console.log("Missing Azan mp3, silent mode."); });
+                    }
+                }
+                // During Azan (Buffer of ~4 minutes assuming longest azan length)
+                else if (diffSeconds < 0 && diffSeconds >= -240 && !audioAzan.paused) {
+                    inPrayerPhase = true;
+                }
+            }
+
+            // Restore normal view if out of phase
+            if (!inPrayerPhase && isSpecialAudioPlaying) {
+                resetToVideoNormal();
+            }
+        }
+
+        function resetToVideoNormal() {
+            isSpecialAudioPlaying = false;
+            audioIndicator.style.display = "none";
+            videoPlayer.play();
+        }
+
+        audioAzan.onended = () => { resetToVideoNormal(); };
+
+        // --- 4. VIDEO PLAYLIST ---
+        function initVideoPlaylist() {
+            if(dashboardData.videos.length > 0) {
+                videoPlayer.src = dashboardData.videos[currentVideoIndex];
+                if(!isSpecialAudioPlaying) videoPlayer.play();
+                
+                videoPlayer.onended = () => {
+                    currentVideoIndex = (currentVideoIndex + 1) % dashboardData.videos.length;
+                    videoPlayer.src = dashboardData.videos[currentVideoIndex];
+                    if(!isSpecialAudioPlaying) videoPlayer.play();
+                };
+            }
+        }
+
+        // --- 5. DOM POPULATION & ROTATION ---
+        let slideIndex = 0;
+        let quranIndex = 0;
+
+        function updateDashboardUI() {
+            // Populate Status
+            document.getElementById('val-red').textContent = dashboardData.patients.red;
+            document.getElementById('val-yellow').textContent = dashboardData.patients.yellow;
+            document.getElementById('val-green').textContent = dashboardData.patients.green;
+            document.getElementById('val-asthma').textContent = dashboardData.patients.asthma;
+            document.getElementById('val-obs').textContent = dashboardData.patients.observation;
+
+            const centerRotator = document.getElementById('center-rotator');
+            
+            // Clear existing announcements to prevent duplication on re-fetch
+            document.querySelectorAll('.announcement-slide-custom').forEach(el => el.remove());
+            
+            // Append Announcements
+            dashboardData.announcements.forEach((ann, idx) => {
+                let div = document.createElement('div');
+                div.className = 'slide-item announcement-slide-custom';
+                div.innerHTML = `<div class="announcement-box"><h2>MAKLUMAN / INFO</h2><p>${ann}</p></div>`;
+                centerRotator.appendChild(div);
+            });
+
+            // Populate Quran Footer
+            const quranFooter = document.getElementById('quran-footer');
+            quranFooter.innerHTML = '';
+            dashboardData.quran.forEach((q, idx) => {
+                let div = document.createElement('div');
+                div.className = `quran-slide ${idx === 0 ? 'active' : ''}`;
+                div.innerHTML = `<div class="quran-arabic">${q.arabic}</div><div class="quran-bm">${q.bm}</div>`;
+                quranFooter.appendChild(div);
+            });
+        }
+
+        function rotateContent() {
+            // Middle Pane
+            const slides = document.querySelectorAll('.slide-item');
+            if(slides.length > 0) {
+                slides.forEach(s => s.classList.remove('active'));
+                slideIndex = (slideIndex + 1) % slides.length;
+                slides[slideIndex].classList.add('active');
+            }
+
+            // Footer Pane
+            const qSlides = document.querySelectorAll('.quran-slide');
+            if(qSlides.length > 0) {
+                qSlides.forEach(s => s.classList.remove('active'));
+                quranIndex = (quranIndex + 1) % qSlides.length;
+                qSlides[quranIndex].classList.add('active');
+            }
+        }
+
+        // --- 6. BOOTUP / INITIALIZATION ---
+        window.onload = async () => {
+            await fetchPrayerTimes();
+            await fetchDashboardData();
+            
+            // Update Clock & Audio Logic tick every second (1000ms)
+            setInterval(updateClockAndLogic, 1000);
+            
+            // Rotate panels exactly every 15 seconds (15000ms)
+            setInterval(rotateContent, 15000);
+            
+            // Data refresh crons
+            setInterval(async () => {
+                const h = new Date().getHours();
+                if(h === 2) { // Re-fetch heavy data strictly at 2 AM
+                    await fetchPrayerTimes();
+                    await fetchDashboardData();
+                }
+            }, 3600000); 
+        };
+    </script>
+</body>
+</html>
