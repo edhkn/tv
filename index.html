@@ -708,8 +708,10 @@
             isAudioUnlocked = true;
             document.getElementById('audio-overlay').style.display = 'none';
             loadYouTubePlaylist();
-            audioQuran.play().then(() => audioQuran.pause()).catch(() => {});
-            audioAzan.play().then(() => audioAzan.pause()).catch(() => {});
+            
+            // Pengaktifan audio awal
+            audioQuran.play().then(() => { audioQuran.pause(); audioQuran.currentTime = 0; }).catch(() => {});
+            audioAzan.play().then(() => { audioAzan.pause(); audioAzan.currentTime = 0; }).catch(() => {});
         }
 
         async function fetchDashboardData() {
@@ -726,7 +728,6 @@
                             let isPlaylistChanged = data.youtubePlaylist && (data.youtubePlaylist !== dashboardData.youtubePlaylist);
                             dashboardData = Object.assign(dashboardData, data);
                             
-                            // Ambil Waktu Solat Dari GAS Sekiranya Sah
                             if (data.prayerTimes && data.prayerTimes.Subuh && data.prayerTimes.Subuh !== "00:00") {
                                 prayerTimesData = data.prayerTimes;
                                 updatePrayerUI();
@@ -741,11 +742,10 @@
                     }
                 }
             } catch (error) {
-                console.warn("Menunggu respons Google Sheets...", error);
+                console.warn("Menunggu sambungan Google Sheets...", error);
             }
         }
 
-        // FUNGSI KHAS MENGAMBIL WAKTU SOLAT DARI MYSOLAT/WAKTUSOLAT API (PADANG TERAP KDH03)
         async function fetchPrayerTimesFromJakim() {
             try {
                 const res = await fetch("https://api.waktusolat.app/v2/solat/KDH03");
@@ -754,7 +754,6 @@
                 let todayObj = null;
 
                 if (json && json.prayerTime && json.prayerTime.length > 0) {
-                    // Cari entri mengikut tarikh hari ini
                     const now = new Date();
                     const year = now.getFullYear();
                     const month = String(now.getMonth() + 1).padStart(2, '0');
@@ -780,16 +779,14 @@
                     updatePrayerUI();
                 }
             } catch (error) {
-                console.warn("Ralat memuatkan waktu solat terus daripada API KDH03.", error);
+                console.warn("Ralat memuatkan waktu solat terus dari API KDH03.", error);
             }
         }
 
-        // DUAL-PARSER: MENUKAR MASA EPOCH ATAU STRING "HH:MM:SS" KEPADA "HH:MM" WAKTU MALAYSIA
         function convertToTime24MYT(val) {
             if (!val) return "00:00";
 
             let num = Number(val);
-            // Jika ia adalah Epoch Timestamp (Dalam saat atau milisaat)
             if (!isNaN(num) && num > 100000) {
                 if (String(num).length === 10) num = num * 1000;
                 let date = new Date(num);
@@ -798,7 +795,6 @@
                 return `${hours}:${minutes}`;
             }
 
-            // Jika ia adalah format Teks HH:MM:SS
             let str = String(val).trim();
             if (str.includes(':')) {
                 let parts = str.split(':');
@@ -860,6 +856,7 @@
             checkAudioLogic(now);
         }
 
+        /* PERBAIKAN UTAMA: LOGIK AUDIO QURAN & AZAN (KALIS RALAT 404 & UNLOCK AUDIOCONTEXT) */
         function checkAudioLogic(now) {
             if(Object.keys(prayerTimesData).length === 0 || !isAudioUnlocked) return;
 
@@ -874,12 +871,14 @@
                 const diffSeconds = prayerInSeconds - nowInSeconds;
                 const prayerDiv = document.getElementById(`prayer-${solat}`);
 
+                // Kelipan visual 5 minit sebelum/selepas
                 if (diffSeconds <= 300 && diffSeconds >= -300) {
                     if(prayerDiv && !prayerDiv.classList.contains('blinking')) prayerDiv.classList.add('blinking');
                 } else {
                     if(prayerDiv) prayerDiv.classList.remove('blinking');
                 }
 
+                // 1. FASA BACAAN QURAN: 10 MINIT SEBELUM SOLAT (600 Saat > diffSeconds > 0)
                 if (diffSeconds <= 600 && diffSeconds > 0) {
                     inPrayerPhase = true;
                     
@@ -892,10 +891,16 @@
                         audioIndicator.style.display = "block";
                         audioIndicator.textContent = `🔊 Bacaan Al-Quran Sebelum ${solat}`;
                         
-                        audioQuran.src = `quran_${solat.toLowerCase()}.mp3`; 
-                        audioQuran.play().catch(e => console.log("Ralat audio Quran", e));
+                        // Cuba mainkan fail mp3 mengikut nama huruf kecil (seperti: quran_subuh.mp3)
+                        const solatKey = solat.toLowerCase();
+                        audioQuran.src = `quran_${solatKey}.mp3`;
+                        
+                        audioQuran.play().catch(e => {
+                            console.warn(`Fail quran_${solatKey}.mp3 tidak dijumpai dalam repository. Sila muat naik fail audio tersebut.`, e);
+                        });
                     }
                 }
+                // 2. FASA AZAN: TEPAT MASUK WAKTU SOLAT (diffSeconds === 0)
                 else if (diffSeconds === 0) {
                     inPrayerPhase = true;
                     
@@ -910,8 +915,11 @@
                     audioIndicator.textContent = `🔊 Azan ${solat}`;
 
                     audioAzan.src = (solat === 'Subuh') ? 'azan_subuh.mp3' : 'azan_lain.mp3';
-                    audioAzan.play().catch(e => console.log("Ralat audio Azan", e));
+                    audioAzan.play().catch(e => {
+                        console.warn("Fail Azan mp3 tidak dijumpai.", e);
+                    });
                 }
+                // Tempoh Azan berjalan
                 else if (diffSeconds < 0 && diffSeconds >= -240 && (!audioAzan.paused || !audioQuran.paused)) {
                     inPrayerPhase = true;
                 }
@@ -1043,7 +1051,7 @@
             setInterval(updateClockAndLogic, 1000);   
             setInterval(rotateContent, 15000);        
             setInterval(fetchDashboardData, 5000);    
-            setInterval(fetchPrayerTimesFromJakim, 3600000); // Kemaskini semula waktu solat dari e-Solat setiap jam
+            setInterval(fetchPrayerTimesFromJakim, 3600000);
         };
     </script>
 </body>
