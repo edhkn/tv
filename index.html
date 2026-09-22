@@ -726,8 +726,8 @@
                             let isPlaylistChanged = data.youtubePlaylist && (data.youtubePlaylist !== dashboardData.youtubePlaylist);
                             dashboardData = Object.assign(dashboardData, data);
                             
-                            // Load prayer times from backend response
-                            if (data.prayerTimes && data.prayerTimes.Subuh !== "00:00") {
+                            // Ambil Waktu Solat Dari GAS Sekiranya Sah
+                            if (data.prayerTimes && data.prayerTimes.Subuh && data.prayerTimes.Subuh !== "00:00") {
                                 prayerTimesData = data.prayerTimes;
                                 updatePrayerUI();
                             }
@@ -741,45 +741,55 @@
                     }
                 }
             } catch (error) {
-                console.warn("Waiting for Google Sheets response...", error);
+                console.warn("Menunggu respons Google Sheets...", error);
             }
         }
 
-        // DIRECT FETCH FROM WAKTUSOLAT.MY (ZONE KDH03) WITH CLIENT-SIDE PARSER FALLBACK
-        async function fetchDirectPrayerTimes() {
+        // FUNGSI KHAS MENGAMBIL WAKTU SOLAT DARI MYSOLAT/WAKTUSOLAT API (PADANG TERAP KDH03)
+        async function fetchPrayerTimesFromJakim() {
             try {
-                const res = await fetch("https://api.waktusolat.app/solat/KDH03");
+                const res = await fetch("https://api.waktusolat.app/v2/solat/KDH03");
                 const json = await res.json();
                 
-                let timesObj = null;
+                let todayObj = null;
+
                 if (json && json.prayerTime && json.prayerTime.length > 0) {
-                    timesObj = json.prayerTime[0];
-                } else if (json && json.zone) {
-                    timesObj = json;
+                    // Cari entri mengikut tarikh hari ini
+                    const now = new Date();
+                    const year = now.getFullYear();
+                    const month = String(now.getMonth() + 1).padStart(2, '0');
+                    const day = String(now.getDate()).padStart(2, '0');
+                    const todayStr = `${year}-${month}-${day}`;
+
+                    todayObj = json.prayerTime.find(item => item.date === todayStr);
+                    if (!todayObj) todayObj = json.prayerTime[0];
+                } else if (json && json.fajr) {
+                    todayObj = json;
                 }
 
-                if (timesObj) {
+                if (todayObj) {
                     prayerTimesData = {
-                        Subuh: parseTimestampToTime24(timesObj.fajr),
-                        Syuruk: parseTimestampToTime24(timesObj.syuruk || timesObj.sunrise),
-                        Zohor: parseTimestampToTime24(timesObj.dhuhr),
-                        Asar: parseTimestampToTime24(timesObj.asr),
-                        Maghrib: parseTimestampToTime24(timesObj.maghrib),
-                        Isyak: parseTimestampToTime24(timesObj.isha)
+                        Subuh: convertToTime24MYT(todayObj.fajr),
+                        Syuruk: convertToTime24MYT(todayObj.syuruk || todayObj.sunrise),
+                        Zohor: convertToTime24MYT(todayObj.dhuhr),
+                        Asar: convertToTime24MYT(todayObj.asr),
+                        Maghrib: convertToTime24MYT(todayObj.maghrib),
+                        Isyak: convertToTime24MYT(todayObj.isha)
                     };
 
                     updatePrayerUI();
                 }
             } catch (error) {
-                console.warn("Direct API WaktuSolat failed (CORS fallback active).", error);
+                console.warn("Ralat memuatkan waktu solat terus daripada API KDH03.", error);
             }
         }
 
-        // PARSER CONVERTS EPOCH TIMESTAMPS OR STRING TO 24-HOUR TIME
-        function parseTimestampToTime24(val) {
+        // DUAL-PARSER: MENUKAR MASA EPOCH ATAU STRING "HH:MM:SS" KEPADA "HH:MM" WAKTU MALAYSIA
+        function convertToTime24MYT(val) {
             if (!val) return "00:00";
-            
+
             let num = Number(val);
+            // Jika ia adalah Epoch Timestamp (Dalam saat atau milisaat)
             if (!isNaN(num) && num > 100000) {
                 if (String(num).length === 10) num = num * 1000;
                 let date = new Date(num);
@@ -788,6 +798,7 @@
                 return `${hours}:${minutes}`;
             }
 
+            // Jika ia adalah format Teks HH:MM:SS
             let str = String(val).trim();
             if (str.includes(':')) {
                 let parts = str.split(':');
@@ -800,7 +811,7 @@
         function updatePrayerUI() {
             for (let solat in prayerTimesData) {
                 const el = document.getElementById(`prayer-${solat}`);
-                if (el && prayerTimesData[solat] !== "00:00") {
+                if (el && prayerTimesData[solat] && prayerTimesData[solat] !== "00:00") {
                     el.querySelector('.time').textContent = formatTime12(prayerTimesData[solat]);
                 }
             }
@@ -882,7 +893,7 @@
                         audioIndicator.textContent = `🔊 Bacaan Al-Quran Sebelum ${solat}`;
                         
                         audioQuran.src = `quran_${solat.toLowerCase()}.mp3`; 
-                        audioQuran.play().catch(e => console.log("Audio Quran error", e));
+                        audioQuran.play().catch(e => console.log("Ralat audio Quran", e));
                     }
                 }
                 else if (diffSeconds === 0) {
@@ -899,7 +910,7 @@
                     audioIndicator.textContent = `🔊 Azan ${solat}`;
 
                     audioAzan.src = (solat === 'Subuh') ? 'azan_subuh.mp3' : 'azan_lain.mp3';
-                    audioAzan.play().catch(e => console.log("Audio Azan error", e));
+                    audioAzan.play().catch(e => console.log("Ralat audio Azan", e));
                 }
                 else if (diffSeconds < 0 && diffSeconds >= -240 && (!audioAzan.paused || !audioQuran.paused)) {
                     inPrayerPhase = true;
@@ -1026,13 +1037,13 @@
         }
 
         window.onload = async () => {
-            await fetchDirectPrayerTimes();
+            await fetchPrayerTimesFromJakim();
             await fetchDashboardData();
             
-            setInterval(updateClockAndLogic, 1000);   // Clock and Audio Trigger Check
-            setInterval(rotateContent, 15000);        // Rotator
-            setInterval(fetchDashboardData, 5000);    // Sync Google Sheets Data
-            setInterval(fetchDirectPrayerTimes, 3600000); // Sync Prayer Times hourly
+            setInterval(updateClockAndLogic, 1000);   
+            setInterval(rotateContent, 15000);        
+            setInterval(fetchDashboardData, 5000);    
+            setInterval(fetchPrayerTimesFromJakim, 3600000); // Kemaskini semula waktu solat dari e-Solat setiap jam
         };
     </script>
 </body>
