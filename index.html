@@ -759,36 +759,70 @@
             }
         }
 
-        // FUNGSI FETCH WAKTU SOLAT DARI API WAKTUSOLAT.MY (ZON KDH03 - PADANG TERAP / KUALA NERANG)
+        // FUNGSI UTAMA WAKTU SOLAT DARI E-SOLAT JAKIM / WAKTUSOLAT.MY (KDH03)
         async function fetchPrayerTimes() {
+            let fetched = false;
+
+            // Sumber 1: API e-Solat JAKIM (Zon KDH03 - Padang Terap / Kuala Nerang)
             try {
-                const res = await fetch("https://api.waktusolat.app/solat/KDH03");
+                const res = await fetch("https://www.e-solat.gov.my/index.php?r=esolat/jakimpage&idx=KDH03");
                 const json = await res.json();
-                if(json && json.prayerTime && json.prayerTime.length > 0) {
+                if (json && json.prayerTime && json.prayerTime.length > 0) {
                     const times = json.prayerTime[0];
                     prayerTimesData = {
-                        Subuh: times.fajr,
-                        Syuruk: times.syuruk || times.sunrise || "07:00",
-                        Zohor: times.dhuhr,
-                        Asar: times.asr,
-                        Maghrib: times.maghrib,
-                        Isyak: times.isha
+                        Subuh: cleanTimeString(times.fajr),
+                        Syuruk: cleanTimeString(times.syuruk),
+                        Zohor: cleanTimeString(times.dhuhr),
+                        Asar: cleanTimeString(times.asr),
+                        Maghrib: cleanTimeString(times.maghrib),
+                        Isyak: cleanTimeString(times.isha)
                     };
+                    fetched = true;
+                }
+            } catch (e) {
+                console.warn("Mencuba sumber cadangan API WaktuSolat...", e);
+            }
 
-                    for (let solat in prayerTimesData) {
-                        const el = document.getElementById(`prayer-${solat}`);
-                        if(el) {
-                            el.querySelector('.time').textContent = formatTime12(prayerTimesData[solat]);
-                        }
+            // Sumber 2: Fallback ke API waktusolat.app (KDH03)
+            if (!fetched) {
+                try {
+                    const res = await fetch("https://api.waktusolat.app/solat/KDH03");
+                    const json = await res.json();
+                    if (json && json.prayerTime && json.prayerTime.length > 0) {
+                        const times = json.prayerTime[0];
+                        prayerTimesData = {
+                            Subuh: cleanTimeString(times.fajr),
+                            Syuruk: cleanTimeString(times.syuruk || times.sunrise),
+                            Zohor: cleanTimeString(times.dhuhr),
+                            Asar: cleanTimeString(times.asr),
+                            Maghrib: cleanTimeString(times.maghrib),
+                            Isyak: cleanTimeString(times.isha)
+                        };
+                        fetched = true;
+                    }
+                } catch (err) {
+                    console.error("Gagal mengambil data Waktu Solat KDH03 daripada kedua-dua sumber.", err);
+                }
+            }
+
+            if (fetched) {
+                for (let solat in prayerTimesData) {
+                    const el = document.getElementById(`prayer-${solat}`);
+                    if (el) {
+                        el.querySelector('.time').textContent = formatTime12(prayerTimesData[solat]);
                     }
                 }
-            } catch (error) {
-                console.warn("Gagal API Waktu Solat KDH03.", error);
             }
         }
 
+        // Pembersihan format string masa HH:MM
+        function cleanTimeString(timeStr) {
+            if (!timeStr) return "00:00";
+            return timeStr.trim().substring(0, 5);
+        }
+
         function formatTime12(time24) {
-            if(!time24) return "--:--";
+            if(!time24 || time24 === "00:00") return "--:--";
             let [h, m] = time24.substring(0, 5).split(':');
             let hour = parseInt(h);
             let ampm = hour >= 12 ? 'PM' : 'AM';
