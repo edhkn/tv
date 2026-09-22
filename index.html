@@ -508,24 +508,19 @@
         const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyVPT9S6zwOQjUORDge2sl6hHnrn9rJmf3uftmd8_VDxwSvklRLywu26fBn7sQR0MW32w/exec"; 
         
         let dashboardData = {
-            patients: { red: 3, yellow: 8, green: 15, asthma: 2, observation: 5 },
-            announcements: [
-                "Hanya SATU (1) waris dibenarkan menemani pesakit di kawasan rawatan.",
-                "Sila pakai pelitup muka sepanjang berada di dalam kawasan Kecemasan.",
-                "Keutamaan rawatan bergantung pada tahap kritikal kecederaan (Zon Merah)."
-            ],
+            patients: { red: 0, yellow: 0, green: 0, asthma: 0, observation: 0 },
+            announcements: [],
             staff: {
-                pagi: { mo: "Dr. Ahmad Farhan", ma: "En. Khairul", sn: "SN Siti Nurhaliza" },
-                petang: { mo: "Dr. Wong Wei Kit", ma: "En. Muthu", sn: "SN Aisyah" },
-                malam: { mo: "Dr. Sarah", ma: "En. Chong", sn: "SN Aminah" }
+                pagi: { mo: "-", ma: "-", sn: "-" },
+                petang: { mo: "-", ma: "-", sn: "-" },
+                malam: { mo: "-", ma: "-", sn: "-" }
             },
             videos: [
                 "https://www.w3schools.com/html/mov_bbb.mp4" 
             ],
             quran: [
                 { arabic: "وَإِذَا مَرِضْتُ فَهُوَ يَشْفِينِ", bm: "Dan apabila aku sakit, Dialah yang menyembuhkan aku. (Asy-Syu'ara: 80)" },
-                { arabic: "فَإِنَّ مَعَ الْعُسْرِ يُسْرًا", bm: "Maka sesungguhnya bersama kesulitan itu ada kemudahan. (Al-Insyirah: 5)" },
-                { arabic: "لَا يُكَلِّفُ اللَّهُ نَفْسًا إِلَّا وُسْعَهَا", bm: "Allah tidak membebani seseorang melainkan sesuai dengan kesanggupannya. (Al-Baqarah: 286)" }
+                { arabic: "فَإِنَّ مَعَ الْعُسْرِ يُسْرًا", bm: "Maka sesungguhnya bersama kesulitan itu ada kemudahan. (Al-Insyirah: 5)" }
             ]
         };
 
@@ -538,6 +533,7 @@
         let currentVideoIndex = 0;
         let isSpecialAudioPlaying = false; 
         let isAudioUnlocked = false;
+        let lastDataString = ""; // Menyimpan cache data untuk semakan perubahan
 
         function enableAudioSystem() {
             isAudioUnlocked = true;
@@ -547,19 +543,34 @@
             audioAzan.play().then(() => audioAzan.pause()).catch(() => {});
         }
 
+        // 1. DATA FETCHING DENGAN AUTO-SYNC DARI GOOGLE SHEETS
         async function fetchDashboardData() {
             try {
                 if(GAS_WEB_APP_URL && !GAS_WEB_APP_URL.includes("INSERT_YOUR")) {
-                    const res = await fetch(GAS_WEB_APP_URL);
+                    const res = await fetch(`${GAS_WEB_APP_URL}?t=${new Date().getTime()}`); // Cache-busting
                     const data = await res.json();
-                    if(data) dashboardData = Object.assign(dashboardData, data);
+                    
+                    if(data) {
+                        const newString = JSON.stringify(data);
+                        // Hanya kemaskini UI jika ada perubahan dikesan pada Google Sheet
+                        if (newString !== lastDataString) {
+                            lastDataString = newString;
+                            
+                            // Kemaskini data video jika ada senarai baharu
+                            let isVideoChanged = JSON.stringify(dashboardData.videos) !== JSON.stringify(data.videos);
+                            dashboardData = Object.assign(dashboardData, data);
+                            
+                            updateDashboardUI();
+                            
+                            if (isVideoChanged) {
+                                currentVideoIndex = 0;
+                                initVideoPlaylist();
+                            }
+                        }
+                    }
                 }
-                updateDashboardUI();
-                initVideoPlaylist();
             } catch (error) {
-                console.warn("Gagal mendapatkan data Google Sheets. Data fallback digunakan.", error);
-                updateDashboardUI();
-                initVideoPlaylist();
+                console.warn("Menunggu sambungan / Gagal fetch Google Sheets.", error);
             }
         }
 
@@ -714,8 +725,7 @@
             rotatorPanel.innerHTML = '';
             combinedRotatorItems = [];
 
-            // Gabungkan Pengumuman & Al-Quran ke dalam satu array rotasi
-            if(dashboardData.announcements) {
+            if(dashboardData.announcements && dashboardData.announcements.length > 0) {
                 dashboardData.announcements.forEach(ann => {
                     combinedRotatorItems.push({
                         type: 'announcement',
@@ -724,12 +734,19 @@
                 });
             }
 
-            if(dashboardData.quran) {
+            if(dashboardData.quran && dashboardData.quran.length > 0) {
                 dashboardData.quran.forEach(q => {
                     combinedRotatorItems.push({
                         type: 'quran',
                         html: `<h2>📖 AYAT SUCI AL-QURAN</h2><div class="quran-arabic">${q.arabic}</div><div class="quran-bm">${q.bm}</div>`
                     });
+                });
+            }
+
+            if (combinedRotatorItems.length === 0) {
+                combinedRotatorItems.push({
+                    type: 'info',
+                    html: `<h2>📢 INFO / MAKLUMAN</h2><p>Selamat Datang ke Unit Kecemasan & Trauma Hospital Kuala Nerang</p>`
                 });
             }
 
@@ -754,14 +771,14 @@
             await fetchPrayerTimes();
             await fetchDashboardData();
             
-            setInterval(updateClockAndLogic, 1000); // 1 saat
-            setInterval(rotateContent, 15000); // Bertukar setiap 15 saat
+            setInterval(updateClockAndLogic, 1000);   // Kemaskini jam & logik azan setiap 1 saat
+            setInterval(rotateContent, 15000);        // Rotasi pengumuman & Quran setiap 15 saat
+            setInterval(fetchDashboardData, 5000);    // AUTO-SYNC GOOGLE SHEETS SETIAP 5 SAAT
             
             setInterval(async () => {
                 const h = new Date().getHours();
                 if(h === 2) { 
                     await fetchPrayerTimes();
-                    await fetchDashboardData();
                 }
             }, 3600000); 
         };
