@@ -726,6 +726,12 @@
                             let isPlaylistChanged = data.youtubePlaylist && (data.youtubePlaylist !== dashboardData.youtubePlaylist);
                             dashboardData = Object.assign(dashboardData, data);
                             
+                            // Kemaskini Waktu Solat Jika Dibekalkan Backend
+                            if (data.prayerTimes && data.prayerTimes.Subuh !== "00:00") {
+                                prayerTimesData = data.prayerTimes;
+                                updatePrayerUI();
+                            }
+                            
                             updateDashboardUI();
                             
                             if (isPlaylistChanged || !activePlaylistID) {
@@ -735,67 +741,8 @@
                     }
                 }
             } catch (error) {
-                console.warn("Menunggu sambungan / Gagal fetch Google Sheets.", error);
+                console.warn("Menunggu sambungan Google Sheets...", error);
             }
-        }
-
-        // FUNGSI UTAMA WAKTU SOLAT DIRECT DARI API WAKTUSOLAT.MY (ZON KDH03)
-        async function fetchPrayerTimes() {
-            try {
-                const res = await fetch("https://api.waktusolat.app/solat/KDH03");
-                const json = await res.json();
-                
-                let timesObj = null;
-
-                // Membaca array atau objek respons daripada API waktusolat.my
-                if (json && json.prayerTime && json.prayerTime.length > 0) {
-                    timesObj = json.prayerTime[0];
-                } else if (json && json.zone) {
-                    timesObj = json;
-                }
-
-                if (timesObj) {
-                    prayerTimesData = {
-                        Subuh: convertToTime24(timesObj.fajr),
-                        Syuruk: convertToTime24(timesObj.syuruk || timesObj.sunrise),
-                        Zohor: convertToTime24(timesObj.dhuhr),
-                        Asar: convertToTime24(timesObj.asr),
-                        Maghrib: convertToTime24(timesObj.maghrib),
-                        Isyak: convertToTime24(timesObj.isha)
-                    };
-
-                    updatePrayerUI();
-                }
-            } catch (error) {
-                console.error("Ralat memuatkan waktu solat KDH03 dari waktusolat.my", error);
-            }
-        }
-
-        // FUNGSI PENUKARAN FORMAT MASA (MENUKAR EPOCH TIMESTAMP / STRING MASA KEPADA FORMAT HH:MM 24-JAM)
-        function convertToTime24(value) {
-            if (!val) return "00:00";
-            
-            // Jika nilai ialah Epoch Timestamp dalam angka (milisaat atau saat)
-            let num = Number(value);
-            if (!isNaN(num) && num > 1000000) {
-                // Jika timestamp diberikan dalam bentuk saat (10 digit), tukar ke milisaat
-                if (String(num).length === 10) num = num * 1000;
-                let date = new Date(num);
-                
-                // Formatkan mengikut zon masa Malaysia (+8)
-                let hours = date.getHours().toString().padStart(2, '0');
-                let minutes = date.getMinutes().toString().padStart(2, '0');
-                return `${hours}:${minutes}`;
-            }
-
-            // Jika nilai ialah String HH:MM atau HH:MM:SS
-            let str = String(value).trim();
-            if (str.includes(':')) {
-                let parts = str.split(':');
-                return `${parts[0].padStart(2, '0')}:${parts[1].padStart(2, '0')}`;
-            }
-
-            return "00:00";
         }
 
         function updatePrayerUI() {
@@ -809,11 +756,11 @@
 
         function formatTime12(time24) {
             if(!time24 || time24 === "00:00") return "--:--";
-            let [h, m] = time24.split(':');
-            let hour = parseInt(h);
+            let parts = time24.split(':');
+            let hour = parseInt(parts[0]);
             let ampm = hour >= 12 ? 'PM' : 'AM';
             hour = hour % 12 || 12;
-            return `${hour}:${m} ${ampm}`;
+            return `${hour}:${parts[1]} ${ampm}`;
         }
 
         function renderStackedStaffNames(elementId, nameString) {
@@ -859,8 +806,8 @@
             for (let solat in prayerTimesData) {
                 if (solat === 'Syuruk' || !prayerTimesData[solat] || prayerTimesData[solat] === "00:00") continue; 
 
-                let [pH, pM] = prayerTimesData[solat].split(':');
-                const prayerInSeconds = (parseInt(pH) * 3600) + (parseInt(pM) * 60);
+                let parts = prayerTimesData[solat].split(':');
+                const prayerInSeconds = (parseInt(parts[0]) * 3600) + (parseInt(parts[1]) * 60);
                 const diffSeconds = prayerInSeconds - nowInSeconds;
                 const prayerDiv = document.getElementById(`prayer-${solat}`);
 
@@ -884,7 +831,7 @@
                         
                         audioQuran.src = `quran_${solat.toLowerCase()}.mp3`; 
                         audioQuran.play().catch(e => {
-                            console.log(`Fail quran_${solat.toLowerCase()}.mp3 tiada. Menggunakan mod senyap.`, e);
+                            console.log(`Fail quran_${solat.toLowerCase()}.mp3 tiada.`, e);
                         });
                     }
                 }
@@ -903,7 +850,7 @@
 
                     audioAzan.src = (solat === 'Subuh') ? 'azan_subuh.mp3' : 'azan_lain.mp3';
                     audioAzan.play().catch(e => {
-                        console.log("Fail Azan mp3 tiada. Menggunakan mod senyap.", e);
+                        console.log("Fail Azan mp3 tiada.", e);
                     });
                 }
                 else if (diffSeconds < 0 && diffSeconds >= -240 && (!audioAzan.paused || !audioQuran.paused)) {
@@ -1031,17 +978,11 @@
         }
 
         window.onload = async () => {
-            await fetchPrayerTimes();
             await fetchDashboardData();
             
             setInterval(updateClockAndLogic, 1000);   // Jam & Semakan Logik Azan/Quran
             setInterval(rotateContent, 15000);        // Rotasi Pengumuman / Quran
             setInterval(fetchDashboardData, 5000);    // Auto Sync Google Sheets
-            
-            // Kemaskini semula waktu solat dari waktusolat.my setiap jam / 02:00 pagi
-            setInterval(async () => {
-                await fetchPrayerTimes();
-            }, 3600000); 
         };
     </script>
 </body>
