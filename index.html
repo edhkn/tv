@@ -759,45 +759,72 @@
             }
         }
 
-        // FUNGSI KHAS WAKTU SOLAT DARI KHAS KDH03 (WAKTUSOLAT.MY)
-async function fetchPrayerTimes() {
-    try {
-        const res = await fetch("https://api.waktusolat.app/solat/KDH03");
-        const json = await res.json();
-        
-        if (json && json.prayerTime && json.prayerTime.length > 0) {
-            const times = json.prayerTime[0];
-            
-            prayerTimesData = {
-                Subuh: cleanTimeString(times.fajr),
-                Syuruk: cleanTimeString(times.syuruk || times.sunrise),
-                Zohor: cleanTimeString(times.dhuhr),
-                Asar: cleanTimeString(times.asr),
-                Maghrib: cleanTimeString(times.maghrib),
-                Isyak: cleanTimeString(times.isha)
-            };
-
-            for (let solat in prayerTimesData) {
-                const el = document.getElementById(`prayer-${solat}`);
-                if (el) {
-                    el.querySelector('.time').textContent = formatTime12(prayerTimesData[solat]);
+        // FUNGSI KHAS UTAMA WAKTU SOLAT KDH03 (WAKTUSOLAT.MY) DENGAN PENUKAR DUAL-PARSER
+        async function fetchPrayerTimes() {
+            try {
+                const res = await fetch("https://api.waktusolat.app/solat/KDH03");
+                const json = await res.json();
+                
+                let timesObj = null;
+                
+                // Parser 1: Format Array (json.prayerTime[0])
+                if (json && json.prayerTime && json.prayerTime.length > 0) {
+                    timesObj = json.prayerTime[0];
+                } 
+                // Parser 2: Format Objek Terus (json.zones / json.time)
+                else if (json && json.fajr) {
+                    timesObj = json;
                 }
+
+                if (timesObj) {
+                    prayerTimesData = {
+                        Subuh: parseApiTime(timesObj.fajr),
+                        Syuruk: parseApiTime(timesObj.syuruk || timesObj.sunrise),
+                        Zohor: parseApiTime(timesObj.dhuhr),
+                        Asar: parseApiTime(timesObj.asr),
+                        Maghrib: parseApiTime(timesObj.maghrib),
+                        Isyak: parseApiTime(timesObj.isha)
+                    };
+
+                    for (let solat in prayerTimesData) {
+                        const el = document.getElementById(`prayer-${solat}`);
+                        if (el) {
+                            el.querySelector('.time').textContent = formatTime12(prayerTimesData[solat]);
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error("Gagal mengambil data Waktu Solat KDH03 dari waktusolat.my", error);
             }
         }
-    } catch (error) {
-        console.error("Gagal mengambil data Waktu Solat KDH03 dari waktusolat.my", error);
-    }
-}
 
-        // Pembersihan format string masa HH:MM
-        function cleanTimeString(timeStr) {
-            if (!timeStr) return "00:00";
-            return timeStr.trim().substring(0, 5);
+        // FUNGSI PENUKARAN FORMAT MASA API (MENGENDALI EPOCH TIMESTAMP ATAU STRING HH:MM)
+        function parseApiTime(val) {
+            if (!val) return "00:00";
+            
+            // Jika nilai ialah Epoch Timestamp (cth: 1726950000)
+            if (typeof val === 'number' || (!isNaN(val) && String(val).length >= 9)) {
+                let d = new Date(Number(val) * 1000);
+                let h = String(d.getHours()).padStart(2, '0');
+                let m = String(d.getMinutes()).padStart(2, '0');
+                return `${h}:${m}`;
+            }
+            
+            // Jika nilai ialah String HH:MM:SS atau HH:MM
+            let str = String(val).trim();
+            if (str.includes(':')) {
+                let parts = str.split(':');
+                let h = parts[0].padStart(2, '0');
+                let m = parts[1].padStart(2, '0');
+                return `${h}:${m}`;
+            }
+            
+            return "00:00";
         }
 
         function formatTime12(time24) {
             if(!time24 || time24 === "00:00") return "--:--";
-            let [h, m] = time24.substring(0, 5).split(':');
+            let [h, m] = time24.split(':');
             let hour = parseInt(h);
             let ampm = hour >= 12 ? 'PM' : 'AM';
             hour = hour % 12 || 12;
@@ -846,7 +873,7 @@ async function fetchPrayerTimes() {
             let inPrayerPhase = false;
 
             for (let solat in prayerTimesData) {
-                if (solat === 'Syuruk' || !prayerTimesData[solat]) continue; 
+                if (solat === 'Syuruk' || !prayerTimesData[solat] || prayerTimesData[solat] === "00:00") continue; 
 
                 let [pH, pM] = prayerTimesData[solat].split(':');
                 const prayerInSeconds = (parseInt(pH) * 3600) + (parseInt(pM) * 60);
