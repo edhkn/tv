@@ -576,8 +576,8 @@
         <button onclick="enableAudioSystem()">🚨 MULA DISPLAY & AKTIFKAN AUDIO</button>
     </div>
 
-    <audio id="audio-quran"></audio>
-    <audio id="audio-azan"></audio>
+    <audio id="audio-quran" preload="auto"></audio>
+    <audio id="audio-azan" preload="auto"></audio>
 
     <header>
         <div class="header-title-container">
@@ -703,13 +703,21 @@
         let lastDataString = "";
         let activePlaylistID = "";
         let currentQuranSolatName = "";
+        let currentAzanSolatName = "";
 
         function enableAudioSystem() {
             isAudioUnlocked = true;
             document.getElementById('audio-overlay').style.display = 'none';
-            loadYouTubePlaylist();
+            
+            // Tetapkan isipadu maksima 100%
+            audioQuran.volume = 1.0;
+            audioAzan.volume = 1.0;
+
+            // Nyah-sekat pelayar (Browser Context Warmup)
             audioQuran.play().then(() => { audioQuran.pause(); audioQuran.currentTime = 0; }).catch(() => {});
             audioAzan.play().then(() => { audioAzan.pause(); audioAzan.currentTime = 0; }).catch(() => {});
+
+            loadYouTubePlaylist();
         }
 
         async function fetchDashboardData() {
@@ -796,6 +804,7 @@
             checkAudioLogic(now);
         }
 
+        /* LOGIK PEMUTARAN AUDIO QURAN 10 MINIT SEBELUM SOLAT & AZAN */
         function checkAudioLogic(now) {
             if(Object.keys(prayerTimesData).length === 0 || !isAudioUnlocked) return;
 
@@ -810,12 +819,14 @@
                 const diffSeconds = prayerInSeconds - nowInSeconds;
                 const prayerDiv = document.getElementById(`prayer-${solat}`);
 
+                // Visual Kelipan (Blinking) 5 Minit Sebelum / Selepas Solat
                 if (diffSeconds <= 300 && diffSeconds >= -300) {
                     if(prayerDiv && !prayerDiv.classList.contains('blinking')) prayerDiv.classList.add('blinking');
                 } else {
                     if(prayerDiv) prayerDiv.classList.remove('blinking');
                 }
 
+                // 1. FASA BACAAN QURAN: 10 MINIT SEBELUM SOLAT (600 saat > diffSeconds > 0)
                 if (diffSeconds <= 600 && diffSeconds > 0) {
                     inPrayerPhase = true;
                     
@@ -830,15 +841,23 @@
                         
                         const solatKey = solat.toLowerCase();
                         audioQuran.src = `quran_${solatKey}.mp3`;
+                        audioQuran.volume = 1.0;
+                        audioQuran.currentTime = 0;
                         
-                        audioQuran.play().catch(e => {
-                            console.warn(`Fail quran_${solatKey}.mp3 tidak dijumpai.`, e);
-                        });
+                        let playPromise = audioQuran.play();
+                        if (playPromise !== undefined) {
+                            playPromise.catch(error => {
+                                console.warn(`Peringatan: Fail quran_${solatKey}.mp3 tidak ditemui atau disekat oleh pelayar.`, error);
+                            });
+                        }
                     }
                 }
-                else if (diffSeconds === 0) {
+                // 2. FASA AZAN TEPAT WAKTU (diffSeconds 0 hingga -3 saat)
+                else if (diffSeconds <= 0 && diffSeconds >= -3 && currentAzanSolatName !== solat) {
                     inPrayerPhase = true;
+                    currentAzanSolatName = solat;
                     
+                    // Hentikan Al-Quran
                     audioQuran.pause();
                     audioQuran.currentTime = 0;
                     currentQuranSolatName = "";
@@ -849,11 +868,19 @@
                     audioIndicator.style.display = "block";
                     audioIndicator.textContent = `🔊 Azan ${solat}`;
 
-                    audioAzan.src = (solat === 'Subuh') ? 'azan_subuh.mp3' : 'azan_lain.mp3';
-                    audioAzan.play().catch(e => {
-                        console.warn("Fail Azan mp3 tidak dijumpai.", e);
-                    });
+                    const azanFile = (solat === 'Subuh') ? 'azan_subuh.mp3' : 'azan_lain.mp3';
+                    audioAzan.src = azanFile;
+                    audioAzan.volume = 1.0;
+                    audioAzan.currentTime = 0;
+
+                    let azanPromise = audioAzan.play();
+                    if (azanPromise !== undefined) {
+                        azanPromise.catch(error => {
+                            console.warn("Peringatan: Fail Azan .mp3 tidak ditemui.", error);
+                        });
+                    }
                 }
+                // Tempoh Azan Sedang Dimainkan
                 else if (diffSeconds < 0 && diffSeconds >= -240 && (!audioAzan.paused || !audioQuran.paused)) {
                     inPrayerPhase = true;
                 }
@@ -867,6 +894,7 @@
         function resetToVideoNormal() {
             isSpecialAudioPlaying = false;
             currentQuranSolatName = "";
+            currentAzanSolatName = "";
             audioIndicator.style.display = "none";
             muteYouTubePlayer(false);
         }
