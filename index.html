@@ -726,7 +726,7 @@
                             let isPlaylistChanged = data.youtubePlaylist && (data.youtubePlaylist !== dashboardData.youtubePlaylist);
                             dashboardData = Object.assign(dashboardData, data);
                             
-                            // Kemaskini Waktu Solat Jika Dibekalkan Backend
+                            // Load prayer times from backend response
                             if (data.prayerTimes && data.prayerTimes.Subuh !== "00:00") {
                                 prayerTimesData = data.prayerTimes;
                                 updatePrayerUI();
@@ -741,8 +741,60 @@
                     }
                 }
             } catch (error) {
-                console.warn("Menunggu sambungan Google Sheets...", error);
+                console.warn("Waiting for Google Sheets response...", error);
             }
+        }
+
+        // DIRECT FETCH FROM WAKTUSOLAT.MY (ZONE KDH03) WITH CLIENT-SIDE PARSER FALLBACK
+        async function fetchDirectPrayerTimes() {
+            try {
+                const res = await fetch("https://api.waktusolat.app/solat/KDH03");
+                const json = await res.json();
+                
+                let timesObj = null;
+                if (json && json.prayerTime && json.prayerTime.length > 0) {
+                    timesObj = json.prayerTime[0];
+                } else if (json && json.zone) {
+                    timesObj = json;
+                }
+
+                if (timesObj) {
+                    prayerTimesData = {
+                        Subuh: parseTimestampToTime24(timesObj.fajr),
+                        Syuruk: parseTimestampToTime24(timesObj.syuruk || timesObj.sunrise),
+                        Zohor: parseTimestampToTime24(timesObj.dhuhr),
+                        Asar: parseTimestampToTime24(timesObj.asr),
+                        Maghrib: parseTimestampToTime24(timesObj.maghrib),
+                        Isyak: parseTimestampToTime24(timesObj.isha)
+                    };
+
+                    updatePrayerUI();
+                }
+            } catch (error) {
+                console.warn("Direct API WaktuSolat failed (CORS fallback active).", error);
+            }
+        }
+
+        // PARSER CONVERTS EPOCH TIMESTAMPS OR STRING TO 24-HOUR TIME
+        function parseTimestampToTime24(val) {
+            if (!val) return "00:00";
+            
+            let num = Number(val);
+            if (!isNaN(num) && num > 100000) {
+                if (String(num).length === 10) num = num * 1000;
+                let date = new Date(num);
+                let hours = date.getHours().toString().padStart(2, '0');
+                let minutes = date.getMinutes().toString().padStart(2, '0');
+                return `${hours}:${minutes}`;
+            }
+
+            let str = String(val).trim();
+            if (str.includes(':')) {
+                let parts = str.split(':');
+                return `${parts[0].padStart(2, '0')}:${parts[1].padStart(2, '0')}`;
+            }
+
+            return "00:00";
         }
 
         function updatePrayerUI() {
@@ -830,9 +882,7 @@
                         audioIndicator.textContent = `🔊 Bacaan Al-Quran Sebelum ${solat}`;
                         
                         audioQuran.src = `quran_${solat.toLowerCase()}.mp3`; 
-                        audioQuran.play().catch(e => {
-                            console.log(`Fail quran_${solat.toLowerCase()}.mp3 tiada.`, e);
-                        });
+                        audioQuran.play().catch(e => console.log("Audio Quran error", e));
                     }
                 }
                 else if (diffSeconds === 0) {
@@ -849,9 +899,7 @@
                     audioIndicator.textContent = `🔊 Azan ${solat}`;
 
                     audioAzan.src = (solat === 'Subuh') ? 'azan_subuh.mp3' : 'azan_lain.mp3';
-                    audioAzan.play().catch(e => {
-                        console.log("Fail Azan mp3 tiada.", e);
-                    });
+                    audioAzan.play().catch(e => console.log("Audio Azan error", e));
                 }
                 else if (diffSeconds < 0 && diffSeconds >= -240 && (!audioAzan.paused || !audioQuran.paused)) {
                     inPrayerPhase = true;
@@ -978,11 +1026,13 @@
         }
 
         window.onload = async () => {
+            await fetchDirectPrayerTimes();
             await fetchDashboardData();
             
-            setInterval(updateClockAndLogic, 1000);   // Jam & Semakan Logik Azan/Quran
-            setInterval(rotateContent, 15000);        // Rotasi Pengumuman / Quran
-            setInterval(fetchDashboardData, 5000);    // Auto Sync Google Sheets
+            setInterval(updateClockAndLogic, 1000);   // Clock and Audio Trigger Check
+            setInterval(rotateContent, 15000);        // Rotator
+            setInterval(fetchDashboardData, 5000);    // Sync Google Sheets Data
+            setInterval(fetchDirectPrayerTimes, 3600000); // Sync Prayer Times hourly
         };
     </script>
 </body>
