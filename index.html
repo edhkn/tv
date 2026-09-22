@@ -708,8 +708,6 @@
             isAudioUnlocked = true;
             document.getElementById('audio-overlay').style.display = 'none';
             loadYouTubePlaylist();
-            
-            // Pengaktifan audio awal
             audioQuran.play().then(() => { audioQuran.pause(); audioQuran.currentTime = 0; }).catch(() => {});
             audioAzan.play().then(() => { audioAzan.pause(); audioAzan.currentTime = 0; }).catch(() => {});
         }
@@ -744,64 +742,6 @@
             } catch (error) {
                 console.warn("Menunggu sambungan Google Sheets...", error);
             }
-        }
-
-        async function fetchPrayerTimesFromJakim() {
-            try {
-                const res = await fetch("https://api.waktusolat.app/v2/solat/KDH03");
-                const json = await res.json();
-                
-                let todayObj = null;
-
-                if (json && json.prayerTime && json.prayerTime.length > 0) {
-                    const now = new Date();
-                    const year = now.getFullYear();
-                    const month = String(now.getMonth() + 1).padStart(2, '0');
-                    const day = String(now.getDate()).padStart(2, '0');
-                    const todayStr = `${year}-${month}-${day}`;
-
-                    todayObj = json.prayerTime.find(item => item.date === todayStr);
-                    if (!todayObj) todayObj = json.prayerTime[0];
-                } else if (json && json.fajr) {
-                    todayObj = json;
-                }
-
-                if (todayObj) {
-                    prayerTimesData = {
-                        Subuh: convertToTime24MYT(todayObj.fajr),
-                        Syuruk: convertToTime24MYT(todayObj.syuruk || todayObj.sunrise),
-                        Zohor: convertToTime24MYT(todayObj.dhuhr),
-                        Asar: convertToTime24MYT(todayObj.asr),
-                        Maghrib: convertToTime24MYT(todayObj.maghrib),
-                        Isyak: convertToTime24MYT(todayObj.isha)
-                    };
-
-                    updatePrayerUI();
-                }
-            } catch (error) {
-                console.warn("Ralat memuatkan waktu solat terus dari API KDH03.", error);
-            }
-        }
-
-        function convertToTime24MYT(val) {
-            if (!val) return "00:00";
-
-            let num = Number(val);
-            if (!isNaN(num) && num > 100000) {
-                if (String(num).length === 10) num = num * 1000;
-                let date = new Date(num);
-                let hours = date.getHours().toString().padStart(2, '0');
-                let minutes = date.getMinutes().toString().padStart(2, '0');
-                return `${hours}:${minutes}`;
-            }
-
-            let str = String(val).trim();
-            if (str.includes(':')) {
-                let parts = str.split(':');
-                return `${parts[0].padStart(2, '0')}:${parts[1].padStart(2, '0')}`;
-            }
-
-            return "00:00";
         }
 
         function updatePrayerUI() {
@@ -856,7 +796,6 @@
             checkAudioLogic(now);
         }
 
-        /* PERBAIKAN UTAMA: LOGIK AUDIO QURAN & AZAN (KALIS RALAT 404 & UNLOCK AUDIOCONTEXT) */
         function checkAudioLogic(now) {
             if(Object.keys(prayerTimesData).length === 0 || !isAudioUnlocked) return;
 
@@ -871,14 +810,12 @@
                 const diffSeconds = prayerInSeconds - nowInSeconds;
                 const prayerDiv = document.getElementById(`prayer-${solat}`);
 
-                // Kelipan visual 5 minit sebelum/selepas
                 if (diffSeconds <= 300 && diffSeconds >= -300) {
                     if(prayerDiv && !prayerDiv.classList.contains('blinking')) prayerDiv.classList.add('blinking');
                 } else {
                     if(prayerDiv) prayerDiv.classList.remove('blinking');
                 }
 
-                // 1. FASA BACAAN QURAN: 10 MINIT SEBELUM SOLAT (600 Saat > diffSeconds > 0)
                 if (diffSeconds <= 600 && diffSeconds > 0) {
                     inPrayerPhase = true;
                     
@@ -891,16 +828,14 @@
                         audioIndicator.style.display = "block";
                         audioIndicator.textContent = `🔊 Bacaan Al-Quran Sebelum ${solat}`;
                         
-                        // Cuba mainkan fail mp3 mengikut nama huruf kecil (seperti: quran_subuh.mp3)
                         const solatKey = solat.toLowerCase();
                         audioQuran.src = `quran_${solatKey}.mp3`;
                         
                         audioQuran.play().catch(e => {
-                            console.warn(`Fail quran_${solatKey}.mp3 tidak dijumpai dalam repository. Sila muat naik fail audio tersebut.`, e);
+                            console.warn(`Fail quran_${solatKey}.mp3 tidak dijumpai.`, e);
                         });
                     }
                 }
-                // 2. FASA AZAN: TEPAT MASUK WAKTU SOLAT (diffSeconds === 0)
                 else if (diffSeconds === 0) {
                     inPrayerPhase = true;
                     
@@ -919,7 +854,6 @@
                         console.warn("Fail Azan mp3 tidak dijumpai.", e);
                     });
                 }
-                // Tempoh Azan berjalan
                 else if (diffSeconds < 0 && diffSeconds >= -240 && (!audioAzan.paused || !audioQuran.paused)) {
                     inPrayerPhase = true;
                 }
@@ -1045,13 +979,11 @@
         }
 
         window.onload = async () => {
-            await fetchPrayerTimesFromJakim();
             await fetchDashboardData();
             
             setInterval(updateClockAndLogic, 1000);   
             setInterval(rotateContent, 15000);        
             setInterval(fetchDashboardData, 5000);    
-            setInterval(fetchPrayerTimesFromJakim, 3600000);
         };
     </script>
 </body>
