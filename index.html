@@ -18,7 +18,7 @@
             --islamic-green: #064e3b;
             --islamic-gold: #fbbf24;
             
-            /* Warna Merah Terang (Zon Merah) */
+            /* Warna Merah Terang */
             --bright-red: #ff0033;
             --bright-red-glow: rgba(255, 0, 51, 0.6);
             
@@ -40,16 +40,46 @@
             color: var(--text-main);
             width: 100vw;
             height: 100vh;
-            overflow: hidden; /* Elak scroll pada skrin TV */
+            overflow: hidden;
             display: flex;
             flex-direction: column;
         }
 
-        /* 1. HEADER (10vh) */
+        /* OVERLAY AUTO-PLAY AUDIO PERTAMA */
+        #audio-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(11, 15, 25, 0.95);
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: var(--bright-red);
+            cursor: pointer;
+            text-align: center;
+            padding: 20px;
+        }
+
+        #audio-overlay button {
+            background: var(--bright-red);
+            color: #fff;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.5rem;
+            font-weight: 900;
+            border-radius: 50px;
+            margin-top: 20px;
+            cursor: pointer;
+            box-shadow: 0 0 20px var(--bright-red-glow);
+            animation: pulse 1.5s infinite;
+        }
+
+        /* 1. HEADER (9vh) */
         header {
             height: 9vh;
             background-color: var(--bg-card);
-            border-bottom: 3px solid var(--hospital-blue);
+            border-bottom: 3px solid var(--bright-red);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -59,14 +89,15 @@
         }
 
         .header-title h1 {
-            font-size: 1.9rem;
+            font-size: 1.8rem;
             font-weight: 900;
             letter-spacing: 1px;
-            color: var(--hospital-blue);
+            color: var(--bright-red);
+            text-shadow: 0 0 10px var(--bright-red-glow);
         }
 
         .header-title p {
-            font-size: 1rem;
+            font-size: 0.95rem;
             color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 2px;
@@ -78,41 +109,41 @@
         }
 
         .clock-time {
-            font-size: 2.3rem;
+            font-size: 2.2rem;
             font-weight: 900;
             color: var(--islamic-gold);
             line-height: 1;
         }
 
         .clock-date {
-            font-size: 1.1rem;
+            font-size: 1rem;
             color: var(--text-main);
             font-weight: 600;
         }
 
-        /* 2. KAWASAN UTAMA (80vh) */
+        /* 2. KAWASAN UTAMA (91vh) */
         main {
-            height: 79vh;
+            height: 91vh;
             display: flex;
             flex-direction: column;
             padding: 15px 20px;
             gap: 15px;
         }
 
-        /* BAHAGIAN ATAS: Video (65%) & Solat/Staf (35%) */
+        /* BAHAGIAN ATAS: Video (60%), Solat (20%) & Staf (20%) */
         .top-section {
-            height: 55vh;
+            height: 60vh;
             display: flex;
             gap: 15px;
         }
 
         .video-box {
-            width: 65%;
+            width: 60%;
             background-color: #000;
             border-radius: 12px;
             overflow: hidden;
-            border: 2px solid var(--bg-card);
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.5);
+            border: 2px solid var(--bright-red);
+            box-shadow: 0 0 15px var(--bright-red-glow);
             position: relative;
         }
 
@@ -138,29 +169,31 @@
             z-index: 20;
         }
 
-        .side-box {
-            width: 35%;
+        .prayer-card {
+            width: 20%;
+            background-color: var(--islamic-green);
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.5);
+            border: 2px solid var(--islamic-gold);
             display: flex;
             flex-direction: column;
-            gap: 15px;
         }
 
-        .prayer-card, .staff-card {
+        .staff-card {
+            width: 20%;
             background-color: var(--bg-card);
             border-radius: 12px;
-            padding: 15px 20px;
+            padding: 15px;
             box-shadow: 0 8px 15px rgba(0, 0, 0, 0.5);
-        }
-
-        .prayer-card {
-            flex: 1.2;
-            background-color: var(--islamic-green);
-            border: 2px solid var(--islamic-gold);
+            border-top: 4px solid var(--bright-red);
+            display: flex;
+            flex-direction: column;
         }
 
         .panel-title {
             text-align: center;
-            font-size: 1.05rem;
+            font-size: 1rem;
             text-transform: uppercase;
             font-weight: 900;
             margin-bottom: 10px;
@@ -169,10 +202,17 @@
             padding-bottom: 8px;
         }
 
+        .staff-card .panel-title {
+            color: var(--bright-red);
+            border-bottom-color: rgba(255, 0, 51, 0.3);
+        }
+
         .prayer-list {
             display: flex;
             flex-direction: column;
             gap: 8px;
+            flex: 1;
+            justify-content: space-around;
         }
 
         .prayer-item {
@@ -181,28 +221,18 @@
             background: rgba(0, 0, 0, 0.25);
             padding: 8px 12px;
             border-radius: 6px;
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: 700;
-        }
-
-        .staff-card {
-            flex: 1;
-            border-top: 4px solid var(--hospital-blue);
-        }
-
-        .staff-card .panel-title {
-            color: var(--hospital-blue);
-            border-bottom-color: rgba(56, 189, 248, 0.3);
         }
 
         .shift-badge {
             display: inline-block;
-            background: var(--hospital-blue);
-            color: #0f172a;
-            padding: 2px 10px;
+            background: var(--bright-red);
+            color: #ffffff;
+            padding: 2px 8px;
             border-radius: 6px;
-            font-size: 0.85rem;
-            margin-left: 10px;
+            font-size: 0.8rem;
+            margin-left: 5px;
             vertical-align: middle;
             font-weight: 900;
         }
@@ -211,22 +241,23 @@
             display: flex;
             flex-direction: column;
             gap: 10px;
-            margin-top: 10px;
+            flex: 1;
+            justify-content: space-around;
         }
 
         .staff-item {
             background: rgba(255, 255, 255, 0.05);
-            padding: 10px 12px;
+            padding: 8px 10px;
             border-radius: 8px;
-            border-left: 4px solid var(--hospital-blue);
+            border-left: 4px solid var(--bright-red);
         }
 
-        .staff-role { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; }
-        .staff-name { font-size: 1.05rem; font-weight: 800; color: #f1f5f9; margin-top: 3px;}
+        .staff-role { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; }
+        .staff-name { font-size: 0.95rem; font-weight: 800; color: #f1f5f9; margin-top: 2px; }
 
-        /* BAHAGIAN BAWAH: Status Pesakit & Pengumuman */
+        /* BAHAGIAN BAWAH: Status Pesakit (65%) & Rotasi Pengumuman/Al-Quran (35%) */
         .bottom-section {
-            height: 24vh;
+            height: 27vh;
             display: flex;
             gap: 15px;
         }
@@ -235,28 +266,28 @@
             width: 65%;
             background-color: var(--bg-card);
             border-radius: 12px;
-            padding: 15px 20px;
+            padding: 12px 15px;
             box-shadow: 0 8px 15px rgba(0, 0, 0, 0.5);
             display: flex;
             flex-direction: column;
-            border: 2px solid rgba(255, 0, 51, 0.4);
+            border: 2px solid var(--bright-red);
         }
 
         .status-panel-header {
             text-align: center;
             color: var(--bright-red);
             font-weight: 900;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             letter-spacing: 1px;
-            margin-bottom: 12px;
-            text-shadow: 0 0 12px var(--bright-red-glow);
+            margin-bottom: 8px;
+            text-shadow: 0 0 10px var(--bright-red-glow);
             text-transform: uppercase;
         }
 
         .status-grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
-            gap: 15px;
+            gap: 10px;
             flex: 1;
         }
 
@@ -265,7 +296,7 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: 10px;
+            padding: 8px;
             border-radius: 10px;
             font-weight: 900;
             color: white;
@@ -273,14 +304,13 @@
             text-align: center;
         }
 
-        .status-card .label { font-size: 0.9rem; margin-bottom: 5px; }
-        .status-card .value { font-size: 2.2rem; line-height: 1; }
+        .status-card .label { font-size: 0.8rem; margin-bottom: 3px; }
+        .status-card .value { font-size: 2rem; line-height: 1; }
 
-        /* WARNA TERANG MERAH */
         .bg-red { 
             background: linear-gradient(135deg, #ff0033 0%, #b91c1c 100%);
             border: 2px solid #ffffff;
-            box-shadow: 0 0 20px var(--bright-red-glow);
+            box-shadow: 0 0 15px var(--bright-red-glow);
             animation: pulse-red 2s infinite;
         }
         
@@ -289,7 +319,7 @@
         .bg-asthma { background-color: var(--zone-asthma); }
         .bg-obs { background-color: var(--zone-obs); }
 
-        .announcement-panel {
+        .rotator-panel {
             width: 35%;
             background-color: var(--bg-card);
             border-radius: 12px;
@@ -300,91 +330,65 @@
             border-left: 5px solid var(--bright-red);
         }
 
-        .announcement-slide {
+        .rotator-slide {
             position: absolute;
-            top: 20px; left: 20px; right: 20px; bottom: 20px;
+            top: 10px; left: 15px; right: 15px; bottom: 10px;
             opacity: 0;
             transition: opacity 1s ease-in-out;
             pointer-events: none;
             display: flex;
             flex-direction: column;
             justify-content: center;
+            align-items: center;
             text-align: center;
         }
 
-        .announcement-slide.active {
+        .rotator-slide.active {
             opacity: 1;
             pointer-events: auto;
         }
 
-        .announcement-slide h2 {
+        .rotator-slide h2 {
             color: var(--bright-red);
-            font-size: 1.3rem;
+            font-size: 1.1rem;
             font-weight: 900;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             text-transform: uppercase;
             text-shadow: 0 0 8px var(--bright-red-glow);
         }
 
-        .announcement-slide p {
-            font-size: 1.25rem;
-            line-height: 1.5;
+        .rotator-slide p {
+            font-size: 1.1rem;
+            line-height: 1.4;
             font-weight: 700;
             color: #f8fafc;
         }
 
-        /* 3. FOOTER (Quran) */
-        footer {
-            height: 12vh;
-            background-color: var(--bg-card);
-            border-top: 2px solid var(--islamic-green);
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0 50px;
-            box-shadow: 0 -4px 10px rgba(0,0,0,0.3);
-        }
-
-        .quran-slide {
-            position: absolute;
-            width: 90%;
-            text-align: center;
-            opacity: 0;
-            transition: opacity 1s ease-in-out;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            gap: 5px;
-        }
-
-        .quran-slide.active { opacity: 1; }
-
         .quran-arabic {
             font-family: 'Amiri', serif;
-            font-size: 2rem;
+            font-size: 1.6rem;
             color: var(--islamic-gold);
-            line-height: 1.4;
+            line-height: 1.3;
+            margin-bottom: 5px;
             text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
         }
 
         .quran-bm {
-            font-size: 1.1rem;
+            font-size: 0.95rem;
             color: #cbd5e1;
             font-style: italic;
         }
 
         /* ANIMASI */
         @keyframes blink {
-            0%, 100% { opacity: 1; background-color: var(--islamic-gold); color: #000; box-shadow: 0 0 10px var(--islamic-gold); }
-            50% { opacity: 0.3; background-color: rgba(251, 191, 36, 0.2); color: var(--text-main); box-shadow: none; }
+            0%, 100% { opacity: 1; background-color: var(--bright-red); color: #fff; box-shadow: 0 0 10px var(--bright-red); }
+            50% { opacity: 0.3; background-color: rgba(255, 0, 51, 0.2); color: var(--text-main); box-shadow: none; }
         }
         .blinking { animation: blink 1.5s infinite; border-radius: 6px; }
 
         @keyframes pulse-red {
             0% { box-shadow: 0 0 10px var(--bright-red-glow); transform: scale(1); }
-            50% { box-shadow: 0 0 25px var(--bright-red-glow); transform: scale(1.03); }
+            50% { box-shadow: 0 0 20px var(--bright-red-glow); transform: scale(1.02); }
             100% { box-shadow: 0 0 10px var(--bright-red-glow); transform: scale(1); }
         }
 
@@ -397,7 +401,14 @@
 </head>
 <body>
 
-    <!-- Fail Audio (Wajib diletak sama folder dengan index.html jika nak mainkan bunyi) -->
+    <!-- OVERLAY AKTIFKAN BUNYI SERTA-MERTA -->
+    <div id="audio-overlay">
+        <h2 style="font-size: 2rem;">PAPAN PEMUKA TV UNIT KECEMASAN</h2>
+        <p style="font-size: 1.2rem; margin-top: 10px;">Sila tekan butang di bawah sekali sahaja untuk membolehkan audio/azan berbunyi automatik.</p>
+        <button onclick="enableAudioSystem()">🚨 MULA DISPLAY & AKTIFKAN AUDIO</button>
+    </div>
+
+    <!-- Fail Audio -->
     <audio id="audio-quran"></audio>
     <audio id="audio-azan"></audio>
 
@@ -415,51 +426,48 @@
 
     <!-- KAWASAN UTAMA -->
     <main>
-        <!-- BAHAGIAN ATAS: Video & Panel Solat/Staf -->
+        <!-- BAHAGIAN ATAS: Video (60%), Solat (20%), Staf (20%) -->
         <div class="top-section">
             <!-- Video -->
             <div class="video-box">
-                <video id="main-video" autoplay muted></video>
+                <video id="main-video" autoplay muted playsinline></video>
                 <div class="audio-indicator" id="audio-indicator">🔊 Sedang Memainkan Bacaan Al-Quran...</div>
             </div>
 
-            <!-- Panel Kanan -->
-            <div class="side-box">
-                <!-- Waktu Solat -->
-                <div class="prayer-card">
-                    <div class="panel-title">Waktu Solat KDH03</div>
-                    <div class="prayer-list" id="prayer-list">
-                        <div class="prayer-item" id="prayer-Subuh"><span>Subuh</span><span class="time">-</span></div>
-                        <div class="prayer-item" id="prayer-Syuruk"><span>Syuruk</span><span class="time">-</span></div>
-                        <div class="prayer-item" id="prayer-Zohor"><span>Zohor</span><span class="time">-</span></div>
-                        <div class="prayer-item" id="prayer-Asar"><span>Asar</span><span class="time">-</span></div>
-                        <div class="prayer-item" id="prayer-Maghrib"><span>Maghrib</span><span class="time">-</span></div>
-                        <div class="prayer-item" id="prayer-Isyak"><span>Isyak</span><span class="time">-</span></div>
-                    </div>
+            <!-- Waktu Solat -->
+            <div class="prayer-card">
+                <div class="panel-title">Waktu Solat KDH03</div>
+                <div class="prayer-list" id="prayer-list">
+                    <div class="prayer-item" id="prayer-Subuh"><span>Subuh</span><span class="time">-</span></div>
+                    <div class="prayer-item" id="prayer-Syuruk"><span>Syuruk</span><span class="time">-</span></div>
+                    <div class="prayer-item" id="prayer-Zohor"><span>Zohor</span><span class="time">-</span></div>
+                    <div class="prayer-item" id="prayer-Asar"><span>Asar</span><span class="time">-</span></div>
+                    <div class="prayer-item" id="prayer-Maghrib"><span>Maghrib</span><span class="time">-</span></div>
+                    <div class="prayer-item" id="prayer-Isyak"><span>Isyak</span><span class="time">-</span></div>
                 </div>
+            </div>
 
-                <!-- Staf Bertugas -->
-                <div class="staff-card">
-                    <div class="panel-title">Pegawai Bertugas <span class="shift-badge" id="current-shift-badge">PAGI</span></div>
-                    <div class="staff-list">
-                        <div class="staff-item">
-                            <div class="staff-role">Pegawai Perubatan (MO)</div>
-                            <div class="staff-name" id="staff-mo">-</div>
-                        </div>
-                        <div class="staff-item">
-                            <div class="staff-role">Penolong Pegawai Perubatan (MA)</div>
-                            <div class="staff-name" id="staff-ma">-</div>
-                        </div>
-                        <div class="staff-item">
-                            <div class="staff-role">Jururawat Bertugas (SN)</div>
-                            <div class="staff-name" id="staff-sn">-</div>
-                        </div>
+            <!-- Staf Bertugas -->
+            <div class="staff-card">
+                <div class="panel-title">Pegawai Bertugas <span class="shift-badge" id="current-shift-badge">PAGI</span></div>
+                <div class="staff-list">
+                    <div class="staff-item">
+                        <div class="staff-role">Pegawai Perubatan (MO)</div>
+                        <div class="staff-name" id="staff-mo">-</div>
+                    </div>
+                    <div class="staff-item">
+                        <div class="staff-role">Penolong Pegawai Perubatan (MA)</div>
+                        <div class="staff-name" id="staff-ma">-</div>
+                    </div>
+                    <div class="staff-item">
+                        <div class="staff-role">Jururawat Bertugas (SN)</div>
+                        <div class="staff-name" id="staff-sn">-</div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- BAHAGIAN BAWAH: Status Pesakit & Pengumuman -->
+        <!-- BAHAGIAN BAWAH: Status Pesakit (65%) & Rotasi Pengumuman/Al-Quran (35%) -->
         <div class="bottom-section">
             <!-- Status Zon -->
             <div class="status-panel">
@@ -488,21 +496,15 @@
                 </div>
             </div>
 
-            <!-- Panel Pengumuman Berputar -->
-            <div class="announcement-panel" id="announcement-rotator">
+            <!-- Panel Pengumuman & Al-Quran Berputar Bertukar 15 Saat -->
+            <div class="rotator-panel" id="rotator-panel">
                 <!-- Data dari JS dimasukkan ke sini -->
             </div>
         </div>
     </main>
 
-    <!-- FOOTER: Quran -->
-    <footer id="quran-footer">
-        <!-- Data dari JS dimasukkan ke sini -->
-    </footer>
-
     <!-- LOGIK JAVASCRIPT -->
     <script>
-        // Gantikan URL di bawah dengan Web App URL Apps Script anda
         const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyVPT9S6zwOQjUORDge2sl6hHnrn9rJmf3uftmd8_VDxwSvklRLywu26fBn7sQR0MW32w/exec"; 
         
         let dashboardData = {
@@ -535,11 +537,19 @@
         
         let currentVideoIndex = 0;
         let isSpecialAudioPlaying = false; 
+        let isAudioUnlocked = false;
 
-        // 1. DATA FETCHING
+        function enableAudioSystem() {
+            isAudioUnlocked = true;
+            document.getElementById('audio-overlay').style.display = 'none';
+            videoPlayer.play();
+            audioQuran.play().then(() => audioQuran.pause()).catch(() => {});
+            audioAzan.play().then(() => audioAzan.pause()).catch(() => {});
+        }
+
         async function fetchDashboardData() {
             try {
-                if(GAS_WEB_APP_URL !== "INSERT_YOUR_GAS_WEB_APP_URL_HERE") {
+                if(GAS_WEB_APP_URL && !GAS_WEB_APP_URL.includes("INSERT_YOUR")) {
                     const res = await fetch(GAS_WEB_APP_URL);
                     const data = await res.json();
                     if(data) dashboardData = Object.assign(dashboardData, data);
@@ -555,39 +565,40 @@
 
         async function fetchPrayerTimes() {
             try {
-                const res = await fetch("https://api.aladhan.com/v1/timingsByCity?city=Padang+Terap&country=Malaysia&method=11");
+                const res = await fetch("https://api.waktusolat.app/solat/KDH03");
                 const json = await res.json();
-                const times = json.data.timings;
-                
-                prayerTimesData = {
-                    Subuh: times.Fajr,
-                    Syuruk: times.Sunrise,
-                    Zohor: times.Dhuhr,
-                    Asar: times.Asr,
-                    Maghrib: times.Maghrib,
-                    Isyak: times.Isha
-                };
+                if(json && json.prayerTime && json.prayerTime.length > 0) {
+                    const times = json.prayerTime[0];
+                    prayerTimesData = {
+                        Subuh: times.fajr,
+                        Syuruk: times.syuruk || times.sunrise || "07:00",
+                        Zohor: times.dhuhr,
+                        Asar: times.asr,
+                        Maghrib: times.maghrib,
+                        Isyak: times.isha
+                    };
 
-                for (let solat in prayerTimesData) {
-                    const el = document.getElementById(`prayer-${solat}`);
-                    if(el) {
-                        el.querySelector('.time').textContent = formatTime12(prayerTimesData[solat]);
+                    for (let solat in prayerTimesData) {
+                        const el = document.getElementById(`prayer-${solat}`);
+                        if(el) {
+                            el.querySelector('.time').textContent = formatTime12(prayerTimesData[solat]);
+                        }
                     }
                 }
             } catch (error) {
-                console.warn("Gagal API Waktu Solat.", error);
+                console.warn("Gagal API Waktu Solat KDH03.", error);
             }
         }
 
         function formatTime12(time24) {
-            let [h, m] = time24.split(':');
+            if(!time24) return "--:--";
+            let [h, m] = time24.substring(0, 5).split(':');
             let hour = parseInt(h);
             let ampm = hour >= 12 ? 'PM' : 'AM';
             hour = hour % 12 || 12;
             return `${hour}:${m} ${ampm}`;
         }
 
-        // 2. JAM & LOGIK SYIF
         function updateClockAndLogic() {
             const now = new Date();
             
@@ -600,40 +611,39 @@
             else if (h >= 15 && h < 22) shift = 'petang'; 
             
             document.getElementById('current-shift-badge').textContent = shift.toUpperCase();
-            document.getElementById('staff-mo').textContent = dashboardData.staff[shift].mo;
-            document.getElementById('staff-ma').textContent = dashboardData.staff[shift].ma;
-            document.getElementById('staff-sn').textContent = dashboardData.staff[shift].sn;
+            if(dashboardData.staff && dashboardData.staff[shift]) {
+                document.getElementById('staff-mo').textContent = dashboardData.staff[shift].mo || "-";
+                document.getElementById('staff-ma').textContent = dashboardData.staff[shift].ma || "-";
+                document.getElementById('staff-sn').textContent = dashboardData.staff[shift].sn || "-";
+            }
 
             checkAudioLogic(now);
         }
 
-        // 3. AUDIO LOGIC (QURAN & AZAN)
         function checkAudioLogic(now) {
-            if(Object.keys(prayerTimesData).length === 0) return;
+            if(Object.keys(prayerTimesData).length === 0 || !isAudioUnlocked) return;
 
             const nowInSeconds = (now.getHours() * 3600) + (now.getMinutes() * 60) + now.getSeconds();
             let inPrayerPhase = false;
 
             for (let solat in prayerTimesData) {
-                if (solat === 'Syuruk') continue; 
+                if (solat === 'Syuruk' || !prayerTimesData[solat]) continue; 
 
                 let [pH, pM] = prayerTimesData[solat].split(':');
                 const prayerInSeconds = (parseInt(pH) * 3600) + (parseInt(pM) * 60);
                 const diffSeconds = prayerInSeconds - nowInSeconds;
                 const prayerDiv = document.getElementById(`prayer-${solat}`);
 
-                // Blink 5 min sebelum & 5 min selepas
                 if (diffSeconds <= 300 && diffSeconds >= -300) {
-                    if(!prayerDiv.classList.contains('blinking')) prayerDiv.classList.add('blinking');
+                    if(prayerDiv && !prayerDiv.classList.contains('blinking')) prayerDiv.classList.add('blinking');
                 } else {
-                    prayerDiv.classList.remove('blinking');
+                    if(prayerDiv) prayerDiv.classList.remove('blinking');
                 }
 
-                // 10 min sebelum -> Quran
                 if (diffSeconds <= 600 && diffSeconds > 0) {
                     inPrayerPhase = true;
-                    if(audioAzan.currentTime > 0) return; 
-                    
+                    if(audioAzan.currentTime > 0 && !audioAzan.paused) return; 
+
                     if (audioQuran.paused && !isSpecialAudioPlaying) {
                         videoPlayer.pause();
                         isSpecialAudioPlaying = true;
@@ -641,13 +651,9 @@
                         audioIndicator.textContent = `🔊 Bacaan Al-Quran Sebelum ${solat}`;
                         
                         audioQuran.src = `quran_${solat.toLowerCase()}.mp3`; 
-                        let playPromise = audioQuran.play();
-                        if (playPromise !== undefined) {
-                            playPromise.catch(e => { console.log("Missing Quran mp3, silent mode."); });
-                        }
+                        audioQuran.play().catch(e => console.log(`Fail quran_${solat.toLowerCase()}.mp3 tiada. Mode senyap.`));
                     }
                 }
-                // Tepat Waktu -> Azan
                 else if (diffSeconds === 0) {
                     inPrayerPhase = true;
                     audioQuran.pause();
@@ -658,18 +664,15 @@
                     audioIndicator.style.display = "block";
                     audioIndicator.textContent = `🔊 Azan ${solat}`;
 
-                    audioAzan.src = solat === 'Subuh' ? 'azan_subuh.mp3' : 'azan_lain.mp3';
-                    let playPromise = audioAzan.play();
-                    if (playPromise !== undefined) {
-                        playPromise.catch(e => { console.log("Missing Azan mp3, silent mode."); });
-                    }
+                    audioAzan.src = (solat === 'Subuh') ? 'azan_subuh.mp3' : 'azan_lain.mp3';
+                    audioAzan.play().catch(e => console.log("Fail Azan mp3 tiada. Mode senyap."));
                 }
                 else if (diffSeconds < 0 && diffSeconds >= -240 && !audioAzan.paused) {
                     inPrayerPhase = true;
                 }
             }
 
-            if (!inPrayerPhase && isSpecialAudioPlaying) {
+            if (!inPrayerPhase && isSpecialAudioPlaying && audioAzan.paused && audioQuran.paused) {
                 resetToVideoNormal();
             }
         }
@@ -682,79 +685,77 @@
 
         audioAzan.onended = () => { resetToVideoNormal(); };
 
-        // 4. VIDEO PLAYLIST
         function initVideoPlaylist() {
-            if(dashboardData.videos.length > 0) {
+            if(dashboardData.videos && dashboardData.videos.length > 0) {
                 videoPlayer.src = dashboardData.videos[currentVideoIndex];
-                if(!isSpecialAudioPlaying) videoPlayer.play();
+                if(!isSpecialAudioPlaying && isAudioUnlocked) videoPlayer.play();
                 
                 videoPlayer.onended = () => {
                     currentVideoIndex = (currentVideoIndex + 1) % dashboardData.videos.length;
                     videoPlayer.src = dashboardData.videos[currentVideoIndex];
-                    if(!isSpecialAudioPlaying) videoPlayer.play();
+                    if(!isSpecialAudioPlaying && isAudioUnlocked) videoPlayer.play();
                 };
             }
         }
 
-        // 5. KEMASKINI UI (STATUS & ROTASI)
-        let slideIndex = 0;
-        let quranIndex = 0;
+        let combinedRotatorItems = [];
+        let combinedIndex = 0;
 
         function updateDashboardUI() {
-            // Status Pesakit
-            document.getElementById('val-red').textContent = dashboardData.patients.red;
-            document.getElementById('val-yellow').textContent = dashboardData.patients.yellow;
-            document.getElementById('val-green').textContent = dashboardData.patients.green;
-            document.getElementById('val-asthma').textContent = dashboardData.patients.asthma;
-            document.getElementById('val-obs').textContent = dashboardData.patients.observation;
+            if(dashboardData.patients) {
+                document.getElementById('val-red').textContent = dashboardData.patients.red || 0;
+                document.getElementById('val-yellow').textContent = dashboardData.patients.yellow || 0;
+                document.getElementById('val-green').textContent = dashboardData.patients.green || 0;
+                document.getElementById('val-asthma').textContent = dashboardData.patients.asthma || 0;
+                document.getElementById('val-obs').textContent = dashboardData.patients.observation || 0;
+            }
 
-            // Pengumuman
-            const centerRotator = document.getElementById('announcement-rotator');
-            centerRotator.innerHTML = ''; // Buang data lama (jika refresh)
-            
-            dashboardData.announcements.forEach((ann, idx) => {
-                let div = document.createElement('div');
-                div.className = `announcement-slide ${idx === 0 ? 'active' : ''}`;
-                div.innerHTML = `<h2>📢 INFO / MAKLUMAN</h2><p>${ann}</p>`;
-                centerRotator.appendChild(div);
-            });
+            const rotatorPanel = document.getElementById('rotator-panel');
+            rotatorPanel.innerHTML = '';
+            combinedRotatorItems = [];
 
-            // Al-Quran Footer
-            const quranFooter = document.getElementById('quran-footer');
-            quranFooter.innerHTML = '';
-            dashboardData.quran.forEach((q, idx) => {
+            // Gabungkan Pengumuman & Al-Quran ke dalam satu array rotasi
+            if(dashboardData.announcements) {
+                dashboardData.announcements.forEach(ann => {
+                    combinedRotatorItems.push({
+                        type: 'announcement',
+                        html: `<h2>📢 INFO / MAKLUMAN</h2><p>${ann}</p>`
+                    });
+                });
+            }
+
+            if(dashboardData.quran) {
+                dashboardData.quran.forEach(q => {
+                    combinedRotatorItems.push({
+                        type: 'quran',
+                        html: `<h2>📖 AYAT SUCI AL-QURAN</h2><div class="quran-arabic">${q.arabic}</div><div class="quran-bm">${q.bm}</div>`
+                    });
+                });
+            }
+
+            combinedRotatorItems.forEach((item, idx) => {
                 let div = document.createElement('div');
-                div.className = `quran-slide ${idx === 0 ? 'active' : ''}`;
-                div.innerHTML = `<div class="quran-arabic">${q.arabic}</div><div class="quran-bm">${q.bm}</div>`;
-                quranFooter.appendChild(div);
+                div.className = `rotator-slide ${idx === 0 ? 'active' : ''}`;
+                div.innerHTML = item.html;
+                rotatorPanel.appendChild(div);
             });
         }
 
         function rotateContent() {
-            // Rotasi Pengumuman
-            const slides = document.querySelectorAll('.announcement-slide');
+            const slides = document.querySelectorAll('.rotator-slide');
             if(slides.length > 0) {
                 slides.forEach(s => s.classList.remove('active'));
-                slideIndex = (slideIndex + 1) % slides.length;
-                slides[slideIndex].classList.add('active');
-            }
-
-            // Rotasi Quran
-            const qSlides = document.querySelectorAll('.quran-slide');
-            if(qSlides.length > 0) {
-                qSlides.forEach(s => s.classList.remove('active'));
-                quranIndex = (quranIndex + 1) % qSlides.length;
-                qSlides[quranIndex].classList.add('active');
+                combinedIndex = (combinedIndex + 1) % slides.length;
+                slides[combinedIndex].classList.add('active');
             }
         }
 
-        // 6. INITIALIZE
         window.onload = async () => {
             await fetchPrayerTimes();
             await fetchDashboardData();
             
             setInterval(updateClockAndLogic, 1000); // 1 saat
-            setInterval(rotateContent, 15000); // 15 saat rotasi
+            setInterval(rotateContent, 15000); // Bertukar setiap 15 saat
             
             setInterval(async () => {
                 const h = new Date().getHours();
