@@ -534,8 +534,8 @@
     <script>
         const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyVPT9S6zwOQjUORDge2sl6hHnrn9rJmf3uftmd8_VDxwSvklRLywu26fBn7sQR0MW32w/exec"; 
         
-        // DEFAULT YOUTUBE PLAYLIST ID (Boleh ditukar menerusi Google Sheets)
-        let defaultPlaylistID = "PLMDNGtzvgdI0_SAt3g7p0K8O8s0gS-O0f"; 
+        // DEFAULT PLAYLIST YOUTUBE
+        let defaultPlaylistID = "PLMDNGtzvgdI0"; 
 
         let dashboardData = {
             patients: { red: 0, yellow: 0, green: 0, asthma: 0, observation: 0 },
@@ -545,7 +545,7 @@
                 petang: { mo: "-", ma: "-", sn: "-" },
                 malam: { mo: "-", ma: "-", sn: "-" }
             },
-            youtubePlaylist: defaultPlaylistID,
+            youtubePlaylist: "https://www.youtube.com/watch?v=AaBF4oKLQZs&list=PLMDNGtzvgdI0",
             quran: [
                 { arabic: "وَإِذَا مَرِضْتُ فَهُوَ يَشْفِينِ", bm: "Dan apabila aku sakit, Dialah yang menyembuhkan aku. (Asy-Syu'ara: 80)" },
                 { arabic: "فَإِنَّ مَعَ الْعُسْرِ يُسْرًا", bm: "Maka sesungguhnya bersama kesulitan itu ada kemudahan. (Al-Insyirah: 5)" }
@@ -721,7 +721,7 @@
 
         audioAzan.onended = () => { resetToVideoNormal(); };
 
-        // 4. LOGIK INTEGRASI PLAYLIST YOUTUBE & AUTO-LOOP
+        // 4. LOGIK EKSTRAK ID & AUTO-PLAYLIST YOUTUBE
         function extractPlaylistId(input) {
             if (!input) return defaultPlaylistID;
             let match = input.match(/[&?]list=([a-zA-Z0-9_-]+)/);
@@ -736,17 +736,16 @@
             let playlistId = extractPlaylistId(dashboardData.youtubePlaylist);
             activePlaylistID = playlistId;
 
-            // Memilih indeks secara rawak dari 0 hingga 30 supaya putaran bermula secara dinamik
+            // Memilih indeks secara rawak dari 0 hingga 20 supaya putaran bermula secara dinamik
             let randomIndex = Math.floor(Math.random() * 20);
 
-            // Parameter shuffle=1 & loop=1 untuk auto-loop playlist tanpa henti
+            // Embed URL YouTube khas untuk auto-loop playlist
             let embedUrl = `https://www.youtube-nocookie.com/embed?listType=playlist&list=${playlistId}&autoplay=1&mute=1&loop=1&shuffle=1&index=${randomIndex}&enablejsapi=1&rel=0`;
 
             youtubePlayer.src = embedUrl;
         }
 
         function muteYouTubePlayer(shouldMute) {
-            // Mengawal iframe YouTube dengan API postMessage
             if (youtubePlayer && youtubePlayer.contentWindow) {
                 let action = shouldMute ? 'mute' : 'unMute';
                 youtubePlayer.contentWindow.postMessage(JSON.stringify({
