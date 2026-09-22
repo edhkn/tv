@@ -8,7 +8,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
     
     <style>
-        /* Tetapan Asas & Pembolehubah Warna */
         :root {
             /* TEMA BACKGROUND KOTAK-KOTAK MERAH */
             --bg-dark-red: #450a0a;
@@ -21,7 +20,6 @@
             --islamic-green: #064e3b;
             --islamic-gold: #fbbf24;
             
-            /* Warna Merah Terang & Neon */
             --bright-red: #ff0033;
             --bright-red-glow: rgba(255, 0, 51, 0.8);
             
@@ -46,7 +44,6 @@
             display: flex;
             flex-direction: column;
             
-            /* LATAR BELAKANG CORAK KOTAK-KOTAK MERAH (GRID RED PATTERN) */
             background-color: var(--bg-dark-red);
             background-image: 
                 linear-gradient(rgba(255, 0, 51, 0.15) 2px, transparent 2px),
@@ -55,7 +52,6 @@
             background-size: 40px 40px, 40px 40px, 100% 100%;
         }
 
-        /* OVERLAY AUTO-PLAY AUDIO PERTAMA */
         #audio-overlay {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
@@ -85,7 +81,6 @@
             animation: pulse 1.5s infinite;
         }
 
-        /* 1. HEADER DENGAN WAKTU SOLAT MENDATAR (11vh) */
         header {
             height: 11vh;
             background-color: var(--bg-card-dark);
@@ -133,7 +128,6 @@
             font-weight: 700;
         }
 
-        /* WAKTU SOLAT DI HEADER (MENDATAR) */
         .header-prayer-bar {
             display: flex;
             align-items: center;
@@ -193,7 +187,6 @@
             font-weight: 700;
         }
 
-        /* 2. KAWASAN UTAMA (89vh) */
         main {
             height: 89vh;
             display: flex;
@@ -386,7 +379,6 @@
             text-shadow: 1px 1px 2px #000;
         }
 
-        /* BAHAGIAN BAWAH */
         .bottom-section {
             height: 28vh;
             display: flex;
@@ -545,7 +537,6 @@
             text-shadow: 1px 1px 2px #000;
         }
 
-        /* ANIMASI KELIP-KELIP WAKTU SOLAT ACTIVE */
         @keyframes blink {
             0%, 100% { 
                 opacity: 1; 
@@ -579,18 +570,15 @@
 </head>
 <body>
 
-    <!-- OVERLAY AKTIFKAN BUNYI SERTA-MERTA -->
     <div id="audio-overlay">
         <h2 style="font-size: 2.2rem;">PAPAN PEMUKA TV UNIT KECEMASAN</h2>
         <p style="font-size: 1.3rem; margin-top: 10px;">Sila tekan butang di bawah sekali sahaja untuk membolehkan audio/azan berbunyi automatik.</p>
         <button onclick="enableAudioSystem()">🚨 MULA DISPLAY & AKTIFKAN AUDIO</button>
     </div>
 
-    <!-- Fail Audio -->
     <audio id="audio-quran"></audio>
     <audio id="audio-azan"></audio>
 
-    <!-- HEADER DENGAN LOGO & WAKTU SOLAT MENDATAR -->
     <header>
         <div class="header-title-container">
             <img src="https://lh3.googleusercontent.com/d/1H9tWnlDLzJpuH8iLClw2zbRIRF0FXqtK" alt="Logo KKM" class="header-logo" onerror="this.style.display='none'">
@@ -600,7 +588,6 @@
             </div>
         </div>
 
-        <!-- WAKTU SOLAT MENDATAR DI HEADER -->
         <div class="header-prayer-bar">
             <div class="header-prayer-item" id="prayer-Subuh"><span class="p-name">Subuh</span><span class="p-time time">-</span></div>
             <div class="header-prayer-item" id="prayer-Syuruk"><span class="p-name">Syuruk</span><span class="p-time time">-</span></div>
@@ -616,10 +603,8 @@
         </div>
     </header>
 
-    <!-- KAWASAN UTAMA -->
     <main>
         <div class="top-section">
-            <!-- Video Box (YouTube Player) -->
             <div class="video-box">
                 <iframe id="youtube-player" 
                         allow="autoplay; encrypted-media; picture-in-picture" 
@@ -629,7 +614,6 @@
                 <div class="audio-indicator" id="audio-indicator">🔊 Sedang Memainkan Bacaan Al-Quran...</div>
             </div>
 
-            <!-- KAD FACEBOOK HOSPITAL KUALA NERANG -->
             <div class="facebook-card">
                 <div class="panel-title">FACEBOOK HKN</div>
                 <div class="fb-content-box">
@@ -639,7 +623,6 @@
                 </div>
             </div>
 
-            <!-- Staf Bertugas -->
             <div class="staff-card">
                 <div class="panel-title">Pegawai Bertugas <span class="shift-badge" id="current-shift-badge">PAGI</span></div>
                 <div class="staff-list">
@@ -660,7 +643,6 @@
         </div>
 
         <div class="bottom-section">
-            <!-- Status Zon -->
             <div class="status-panel">
                 <div class="status-panel-header">🚨 STATUS SEMASA PESAKIT KECEMASAN 🚨</div>
                 <div class="status-grid">
@@ -687,12 +669,10 @@
                 </div>
             </div>
 
-            <!-- Panel Pengumuman / Quran -->
             <div class="rotator-panel" id="rotator-panel"></div>
         </div>
     </main>
 
-    <!-- LOGIK JAVASCRIPT -->
     <script>
         const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyVPT9S6zwOQjUORDge2sl6hHnrn9rJmf3uftmd8_VDxwSvklRLywu26fBn7sQR0MW32w/exec"; 
         let defaultPlaylistID = "PLMDNGtzvgdI0"; 
@@ -746,6 +726,12 @@
                             let isPlaylistChanged = data.youtubePlaylist && (data.youtubePlaylist !== dashboardData.youtubePlaylist);
                             dashboardData = Object.assign(dashboardData, data);
                             
+                            // Kemaskini Waktu Solat Terus dari Data Backend
+                            if (data.prayerTimes) {
+                                prayerTimesData = data.prayerTimes;
+                                updatePrayerUI();
+                            }
+                            
                             updateDashboardUI();
                             
                             if (isPlaylistChanged || !activePlaylistID) {
@@ -759,67 +745,13 @@
             }
         }
 
-        // FUNGSI KHAS UTAMA WAKTU SOLAT KDH03 (WAKTUSOLAT.MY) DENGAN PENUKAR DUAL-PARSER
-        async function fetchPrayerTimes() {
-            try {
-                const res = await fetch("https://api.waktusolat.app/solat/KDH03");
-                const json = await res.json();
-                
-                let timesObj = null;
-                
-                // Parser 1: Format Array (json.prayerTime[0])
-                if (json && json.prayerTime && json.prayerTime.length > 0) {
-                    timesObj = json.prayerTime[0];
-                } 
-                // Parser 2: Format Objek Terus (json.zones / json.time)
-                else if (json && json.fajr) {
-                    timesObj = json;
+        function updatePrayerUI() {
+            for (let solat in prayerTimesData) {
+                const el = document.getElementById(`prayer-${solat}`);
+                if (el) {
+                    el.querySelector('.time').textContent = formatTime12(prayerTimesData[solat]);
                 }
-
-                if (timesObj) {
-                    prayerTimesData = {
-                        Subuh: parseApiTime(timesObj.fajr),
-                        Syuruk: parseApiTime(timesObj.syuruk || timesObj.sunrise),
-                        Zohor: parseApiTime(timesObj.dhuhr),
-                        Asar: parseApiTime(timesObj.asr),
-                        Maghrib: parseApiTime(timesObj.maghrib),
-                        Isyak: parseApiTime(timesObj.isha)
-                    };
-
-                    for (let solat in prayerTimesData) {
-                        const el = document.getElementById(`prayer-${solat}`);
-                        if (el) {
-                            el.querySelector('.time').textContent = formatTime12(prayerTimesData[solat]);
-                        }
-                    }
-                }
-            } catch (error) {
-                console.error("Gagal mengambil data Waktu Solat KDH03 dari waktusolat.my", error);
             }
-        }
-
-        // FUNGSI PENUKARAN FORMAT MASA API (MENGENDALI EPOCH TIMESTAMP ATAU STRING HH:MM)
-        function parseApiTime(val) {
-            if (!val) return "00:00";
-            
-            // Jika nilai ialah Epoch Timestamp (cth: 1726950000)
-            if (typeof val === 'number' || (!isNaN(val) && String(val).length >= 9)) {
-                let d = new Date(Number(val) * 1000);
-                let h = String(d.getHours()).padStart(2, '0');
-                let m = String(d.getMinutes()).padStart(2, '0');
-                return `${h}:${m}`;
-            }
-            
-            // Jika nilai ialah String HH:MM:SS atau HH:MM
-            let str = String(val).trim();
-            if (str.includes(':')) {
-                let parts = str.split(':');
-                let h = parts[0].padStart(2, '0');
-                let m = parts[1].padStart(2, '0');
-                return `${h}:${m}`;
-            }
-            
-            return "00:00";
         }
 
         function formatTime12(time24) {
@@ -865,7 +797,6 @@
             checkAudioLogic(now);
         }
 
-        /* LOGIK AUDIO QURAN 10 MINIT SEBELUM SOLAT & AZAN TEPAT WAKTU */
         function checkAudioLogic(now) {
             if(Object.keys(prayerTimesData).length === 0 || !isAudioUnlocked) return;
 
@@ -880,14 +811,12 @@
                 const diffSeconds = prayerInSeconds - nowInSeconds;
                 const prayerDiv = document.getElementById(`prayer-${solat}`);
 
-                // Active Blink 5 minit sebelum & 5 minit selepas masuk waktu solat
                 if (diffSeconds <= 300 && diffSeconds >= -300) {
                     if(prayerDiv && !prayerDiv.classList.contains('blinking')) prayerDiv.classList.add('blinking');
                 } else {
                     if(prayerDiv) prayerDiv.classList.remove('blinking');
                 }
 
-                // 1. FASA QURAN: 10 MINIT SEBELUM SOLAT (600 Saat > diffSeconds > 0)
                 if (diffSeconds <= 600 && diffSeconds > 0) {
                     inPrayerPhase = true;
                     
@@ -906,7 +835,6 @@
                         });
                     }
                 }
-                // 2. FASA AZAN: TEPAT MASUK WAKTU SOLAT (diffSeconds === 0)
                 else if (diffSeconds === 0) {
                     inPrayerPhase = true;
                     
@@ -925,7 +853,6 @@
                         console.log("Fail Azan mp3 tiada. Menggunakan mod senyap.", e);
                     });
                 }
-                // Tempoh Azan sedang berjalan (sehingga 4 minit selepas masuk waktu)
                 else if (diffSeconds < 0 && diffSeconds >= -240 && (!audioAzan.paused || !audioQuran.paused)) {
                     inPrayerPhase = true;
                 }
@@ -1051,19 +978,11 @@
         }
 
         window.onload = async () => {
-            await fetchPrayerTimes();
             await fetchDashboardData();
             
             setInterval(updateClockAndLogic, 1000);   // Jam & Semakan Logik Azan/Quran
             setInterval(rotateContent, 15000);        // Rotasi Pengumuman / Quran
-            setInterval(fetchDashboardData, 5000);    // Auto Sync Google Sheets
-            
-            setInterval(async () => {
-                const h = new Date().getHours();
-                if(h === 2) { 
-                    await fetchPrayerTimes();
-                }
-            }, 3600000); 
+            setInterval(fetchDashboardData, 5000);    // Auto Sync Google Sheets + Waktu Solat Backend
         };
     </script>
 </body>
