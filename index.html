@@ -10,22 +10,22 @@
     <style>
         /* Tetapan Asas & Pembolehubah Warna */
         :root {
-            /* WARNA BACKGROUND BIRU MUDA PKR */
-            --bg-main: #00b4d8; 
-            --bg-card: #0077b6; 
-            --bg-card-dark: #03045e;
+            /* TEMA BACKGROUND KOTAK-KOTAK MERAH */
+            --bg-dark-red: #450a0a;
+            --bg-card: #7f1d1d; 
+            --bg-card-dark: #180505;
             
             --text-main: #ffffff;
-            --text-muted: #e0f2fe;
-            --hospital-blue: #90e0ef;
+            --text-muted: #fca5a5;
+            --hospital-blue: #38bdf8;
             --islamic-green: #064e3b;
             --islamic-gold: #fbbf24;
             
-            /* Warna Merah Terang */
+            /* Warna Merah Terang & Neon */
             --bright-red: #ff0033;
             --bright-red-glow: rgba(255, 0, 51, 0.8);
             
-            --zone-yellow: #d97706; /* Kuning Kontras Pekat */
+            --zone-yellow: #d97706; 
             --zone-green: #10b981;
             --zone-asthma: #0284c7;
             --zone-obs: #7c3aed;
@@ -39,20 +39,27 @@
 
         body {
             font-family: 'Inter', sans-serif;
-            background-color: var(--bg-main);
             color: var(--text-main);
             width: 100vw;
             height: 100vh;
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            
+            /* LATAR BELAKANG CORAK KOTAK-KOTAK MERAH (GRID RED PATTERN) */
+            background-color: var(--bg-dark-red);
+            background-image: 
+                linear-gradient(rgba(255, 0, 51, 0.15) 2px, transparent 2px),
+                linear-gradient(90deg, rgba(255, 0, 51, 0.15) 2px, transparent 2px),
+                radial-gradient(circle at center, #881337 0%, #450a0a 100%);
+            background-size: 40px 40px, 40px 40px, 100% 100%;
         }
 
         /* OVERLAY AUTO-PLAY AUDIO PERTAMA */
         #audio-overlay {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(0, 119, 182, 0.98);
+            background: rgba(24, 5, 5, 0.98);
             z-index: 999;
             display: flex;
             flex-direction: column;
@@ -87,7 +94,7 @@
             justify-content: space-between;
             align-items: center;
             padding: 0 20px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
             z-index: 10;
             gap: 15px;
         }
@@ -113,8 +120,8 @@
             font-size: clamp(1.1rem, 1.5vw, 1.8rem);
             font-weight: 900;
             letter-spacing: 0.5px;
-            color: var(--bright-red);
-            text-shadow: 0 0 10px var(--bright-red-glow);
+            color: #ffffff;
+            text-shadow: 0 0 10px var(--bright-red-glow), 2px 2px 4px #000000;
             line-height: 1.1;
         }
 
@@ -130,12 +137,12 @@
         .header-prayer-bar {
             display: flex;
             align-items: center;
-            background: rgba(6, 78, 59, 0.85);
+            background: rgba(6, 78, 59, 0.9);
             border: 2px solid var(--islamic-gold);
             border-radius: 10px;
             padding: 4px 10px;
             gap: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.5);
             flex: 1;
             max-width: 48%;
             justify-content: space-around;
@@ -148,14 +155,14 @@
             justify-content: center;
             padding: 2px 6px;
             border-radius: 6px;
-            background: rgba(0, 0, 0, 0.25);
+            background: rgba(0, 0, 0, 0.4);
             min-width: 55px;
         }
 
         .header-prayer-item .p-name {
             font-size: clamp(0.6rem, 0.75vw, 0.85rem);
             font-weight: 800;
-            color: var(--text-main);
+            color: #ffffff;
             text-transform: uppercase;
         }
 
@@ -163,6 +170,7 @@
             font-size: clamp(0.8rem, 1vw, 1.2rem);
             font-weight: 900;
             color: var(--islamic-gold);
+            text-shadow: 1px 1px 2px #000;
         }
 
         .datetime-container {
@@ -175,11 +183,12 @@
             font-weight: 900;
             color: var(--islamic-gold);
             line-height: 1;
+            text-shadow: 2px 2px 4px #000;
         }
 
         .clock-date {
             font-size: clamp(0.75rem, 0.95vw, 1.1rem);
-            color: var(--text-main);
+            color: #ffffff;
             font-weight: 700;
         }
 
@@ -204,8 +213,8 @@
             background-color: #000;
             border-radius: 12px;
             overflow: hidden;
-            border: 3px solid var(--bg-card-dark);
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+            border: 3px solid var(--bright-red);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.7);
             position: relative;
         }
 
@@ -219,7 +228,7 @@
         .audio-indicator {
             position: absolute;
             top: 20px; right: 20px;
-            background: rgba(0,0,0,0.9);
+            background: rgba(0,0,0,0.92);
             padding: 12px 24px;
             border-radius: 8px;
             color: var(--islamic-gold);
@@ -232,16 +241,19 @@
             z-index: 20;
         }
 
-        /* KAD FACEBOOK HOSPITAL KUALA NERANG */
+        /* KAD FACEBOOK HOSPITAL KUALA NERANG KALIS SEKATAN */
         .facebook-card {
             width: 20%;
             background-color: var(--bg-card-dark);
             border-radius: 12px;
             padding: 10px;
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.5);
             border: 2px solid var(--hospital-blue);
             display: flex;
             flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            text-align: center;
             overflow: hidden;
         }
 
@@ -250,23 +262,48 @@
             border-bottom-color: rgba(144, 224, 239, 0.4);
             margin-bottom: 6px;
             flex-shrink: 0;
+            width: 100%;
         }
 
-        .facebook-feed-container {
+        .fb-content-box {
             flex: 1;
             width: 100%;
-            overflow: hidden;
-            border-radius: 8px;
-            background: #ffffff;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-around;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 8px;
         }
 
-        .facebook-feed-container iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
+        .fb-qr-img {
+            background: #ffffff;
+            padding: 6px;
             border-radius: 8px;
+            max-width: 85%;
+            height: auto;
+            aspect-ratio: 1/1;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+
+        .fb-desc-text {
+            font-size: clamp(0.75rem, 0.9vw, 1.05rem);
+            font-weight: 800;
+            color: #ffffff;
+            line-height: 1.3;
+        }
+
+        .fb-badge {
+            background: #1877f2;
+            color: #ffffff;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: clamp(0.65rem, 0.8vw, 0.9rem);
+            font-weight: 900;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
         }
 
         .staff-card {
@@ -274,8 +311,10 @@
             background-color: var(--bg-card-dark);
             border-radius: 12px;
             padding: 12px 15px;
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.5);
             border-top: 5px solid var(--bright-red);
+            border-left: 1px solid rgba(255, 0, 51, 0.3);
+            border-right: 1px solid rgba(255, 0, 51, 0.3);
             display: flex;
             flex-direction: column;
             overflow: hidden;
@@ -295,6 +334,7 @@
         .staff-card .panel-title {
             color: var(--bright-red);
             border-bottom-color: rgba(255, 0, 51, 0.4);
+            text-shadow: 0 0 8px var(--bright-red-glow);
         }
 
         .shift-badge {
@@ -344,6 +384,7 @@
             font-weight: 800; 
             color: #ffffff; 
             line-height: 1.2;
+            text-shadow: 1px 1px 2px #000;
         }
 
         /* BAHAGIAN BAWAH: Status Pesakit (65%) & Rotasi Pengumuman/Al-Quran (35%) */
@@ -358,7 +399,7 @@
             background-color: var(--bg-card-dark);
             border-radius: 12px;
             padding: 10px 12px;
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.5);
             display: flex;
             flex-direction: column;
             border: 2px solid var(--bright-red);
@@ -404,7 +445,7 @@
             border-radius: 10px;
             font-weight: 900;
             color: #ffffff;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
             text-align: center;
             overflow: hidden;
         }
@@ -415,6 +456,7 @@
             font-weight: 800;
             text-transform: uppercase;
             color: #ffffff;
+            text-shadow: 1px 1px 2px #000;
         }
         
         .status-card .value { 
@@ -422,10 +464,11 @@
             line-height: 1; 
             font-weight: 900;
             color: #ffffff;
+            text-shadow: 2px 2px 4px #000;
         }
 
         .bg-red { 
-            background: linear-gradient(135deg, #ff0033 0%, #b91c1c 100%);
+            background: linear-gradient(135deg, #ff0033 0%, #991b1b 100%);
             border: 2px solid #ffffff;
             box-shadow: 0 0 15px var(--bright-red-glow);
             animation: pulse-red 2s infinite;
@@ -434,10 +477,6 @@
         .bg-yellow { 
             background-color: var(--zone-yellow); 
             color: #ffffff; 
-        }
-        .bg-yellow .label, .bg-yellow .value { 
-            color: #ffffff !important; 
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.6);
         }
 
         .bg-green { background-color: var(--zone-green); }
@@ -449,7 +488,7 @@
             background-color: var(--bg-card-dark);
             border-radius: 12px;
             padding: 12px;
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.5);
             position: relative;
             overflow: hidden;
             border-left: 5px solid var(--bright-red);
@@ -487,6 +526,7 @@
             line-height: 1.35;
             font-weight: 800;
             color: #ffffff;
+            text-shadow: 1px 1px 3px #000;
         }
 
         .quran-arabic {
@@ -495,7 +535,7 @@
             color: var(--islamic-gold);
             line-height: 1.3;
             margin-bottom: 4px;
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
         }
 
         .quran-bm {
@@ -503,6 +543,7 @@
             color: #e0f2fe;
             font-style: italic;
             font-weight: 600;
+            text-shadow: 1px 1px 2px #000;
         }
 
         /* ANIMASI */
@@ -579,14 +620,11 @@
 
             <!-- KAD FACEBOOK HOSPITAL KUALA NERANG -->
             <div class="facebook-card">
-                <div class="panel-title">👍 FACEBOOK HKN</div>
-                <div class="facebook-feed-container">
-                    <iframe src="https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2Fshare%2F199ijRaqcr%2F&tabs=timeline&width=300&height=500&small_header=true&adapt_container_width=true&hide_cover=false&show_facepile=false" 
-                            scrolling="no" 
-                            frameborder="0" 
-                            allowfullscreen="true" 
-                            allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share">
-                    </iframe>
+                <div class="panel-title">FACEBOOK HKN</div>
+                <div class="fb-content-box">
+                    <span class="fb-badge">👍 OFFICIAL FACEBOOK</span>
+                    <img class="fb-qr-img" src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://www.facebook.com/share/199ijRaqcr/" alt="QR Facebook HKN">
+                    <p class="fb-desc-text">Imbas QR Code Untuk Melawat Laman Facebook Rasmi Hospital Kuala Nerang</p>
                 </div>
             </div>
 
