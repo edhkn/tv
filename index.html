@@ -167,11 +167,10 @@
             position: relative;
         }
 
-        .video-box video {
+        .video-box iframe {
             width: 100%;
             height: 100%;
             border: none;
-            object-fit: cover;
         }
 
         .audio-indicator {
@@ -452,9 +451,13 @@
     <main>
         <!-- BAHAGIAN ATAS: Video (60%), Solat (20%), Staf (20%) -->
         <div class="top-section">
-            <!-- Video Container -->
+            <!-- Video Container (YouTube Player) -->
             <div class="video-box" id="video-box">
-                <video id="main-video" autoplay muted playsinline></video>
+                <iframe id="youtube-player" 
+                        allow="autoplay; encrypted-media; picture-in-picture" 
+                        referrerpolicy="strict-origin-when-cross-origin" 
+                        allowfullscreen>
+                </iframe>
                 <div class="audio-indicator" id="audio-indicator">🔊 Sedang Memainkan Bacaan Al-Quran...</div>
             </div>
 
@@ -531,6 +534,9 @@
     <script>
         const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyVPT9S6zwOQjUORDge2sl6hHnrn9rJmf3uftmd8_VDxwSvklRLywu26fBn7sQR0MW32w/exec"; 
         
+        // DEFAULT YOUTUBE PLAYLIST ID (Boleh ditukar menerusi Google Sheets)
+        let defaultPlaylistID = "PLMDNGtzvgdI0_SAt3g7p0K8O8s0gS-O0f"; 
+
         let dashboardData = {
             patients: { red: 0, yellow: 0, green: 0, asthma: 0, observation: 0 },
             announcements: [],
@@ -539,9 +545,7 @@
                 petang: { mo: "-", ma: "-", sn: "-" },
                 malam: { mo: "-", ma: "-", sn: "-" }
             },
-            videos: [
-                "https://www.w3schools.com/html/mov_bbb.mp4" 
-            ],
+            youtubePlaylist: defaultPlaylistID,
             quran: [
                 { arabic: "وَإِذَا مَرِضْتُ فَهُوَ يَشْفِينِ", bm: "Dan apabila aku sakit, Dialah yang menyembuhkan aku. (Asy-Syu'ara: 80)" },
                 { arabic: "فَإِنَّ مَعَ الْعُسْرِ يُسْرًا", bm: "Maka sesungguhnya bersama kesulitan itu ada kemudahan. (Al-Insyirah: 5)" }
@@ -549,24 +553,25 @@
         };
 
         let prayerTimesData = {};
-        const videoPlayer = document.getElementById('main-video');
         const audioQuran = document.getElementById('audio-quran');
         const audioAzan = document.getElementById('audio-azan');
         const audioIndicator = document.getElementById('audio-indicator');
+        const youtubePlayer = document.getElementById('youtube-player');
         
-        let currentVideoIndex = 0;
         let isSpecialAudioPlaying = false; 
         let isAudioUnlocked = false;
         let lastDataString = "";
+        let activePlaylistID = "";
 
         function enableAudioSystem() {
             isAudioUnlocked = true;
             document.getElementById('audio-overlay').style.display = 'none';
-            playCurrentVideo();
+            loadYouTubePlaylist();
             audioQuran.play().then(() => audioQuran.pause()).catch(() => {});
             audioAzan.play().then(() => audioAzan.pause()).catch(() => {});
         }
 
+        // 1. DATA FETCHING DENGAN AUTO-SYNC DARI GOOGLE SHEETS
         async function fetchDashboardData() {
             try {
                 if(GAS_WEB_APP_URL && !GAS_WEB_APP_URL.includes("INSERT_YOUR")) {
@@ -578,14 +583,13 @@
                         if (newString !== lastDataString) {
                             lastDataString = newString;
                             
-                            let isVideoChanged = JSON.stringify(dashboardData.videos) !== JSON.stringify(data.videos);
+                            let isPlaylistChanged = data.youtubePlaylist && (data.youtubePlaylist !== dashboardData.youtubePlaylist);
                             dashboardData = Object.assign(dashboardData, data);
                             
                             updateDashboardUI();
                             
-                            if (isVideoChanged) {
-                                currentVideoIndex = 0;
-                                initVideoPlaylist();
+                            if (isPlaylistChanged || !activePlaylistID) {
+                                loadYouTubePlaylist();
                             }
                         }
                     }
@@ -677,7 +681,7 @@
                     if(audioAzan.currentTime > 0 && !audioAzan.paused) return; 
 
                     if (audioQuran.paused && !isSpecialAudioPlaying) {
-                        pauseCurrentVideo();
+                        muteYouTubePlayer(true);
                         isSpecialAudioPlaying = true;
                         audioIndicator.style.display = "block";
                         audioIndicator.textContent = `🔊 Bacaan Al-Quran Sebelum ${solat}`;
@@ -690,7 +694,7 @@
                     inPrayerPhase = true;
                     audioQuran.pause();
                     audioQuran.currentTime = 0;
-                    pauseCurrentVideo();
+                    muteYouTubePlayer(true);
                     isSpecialAudioPlaying = true;
                     
                     audioIndicator.style.display = "block";
@@ -712,58 +716,45 @@
         function resetToVideoNormal() {
             isSpecialAudioPlaying = false;
             audioIndicator.style.display = "none";
-            playCurrentVideo();
+            muteYouTubePlayer(false);
         }
 
         audioAzan.onended = () => { resetToVideoNormal(); };
 
-        function extractDriveId(url) {
-            if(!url) return null;
-            let match = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
-            return match ? match[1] : null;
+        // 4. LOGIK INTEGRASI PLAYLIST YOUTUBE & AUTO-LOOP
+        function extractPlaylistId(input) {
+            if (!input) return defaultPlaylistID;
+            let match = input.match(/[&?]list=([a-zA-Z0-9_-]+)/);
+            if (match && match[1]) return match[1];
+            if (input.startsWith("PL") || input.startsWith("UU") || input.length > 15) return input.trim();
+            return defaultPlaylistID;
         }
 
-        function initVideoPlaylist() {
-            if(!dashboardData.videos || dashboardData.videos.length === 0) return;
-            playCurrentVideo();
-        }
-
-        function playCurrentVideo() {
-            if(isSpecialAudioPlaying || !isAudioUnlocked) return;
+        function loadYouTubePlaylist() {
+            if (!isAudioUnlocked) return;
             
-            let currentUrl = dashboardData.videos[currentVideoIndex];
-            if(!currentUrl) return;
+            let playlistId = extractPlaylistId(dashboardData.youtubePlaylist);
+            activePlaylistID = playlistId;
 
-            let driveId = extractDriveId(currentUrl);
-            
-            let streamUrl = driveId 
-                ? `https://drive.google.com/uc?export=download&id=${driveId}` 
-                : currentUrl;
+            // Memilih indeks secara rawak dari 0 hingga 30 supaya putaran bermula secara dinamik
+            let randomIndex = Math.floor(Math.random() * 20);
 
-            videoPlayer.src = streamUrl;
-            videoPlayer.play().catch(e => {
-                console.warn("Gagal memainkan video, mencuba video seterusnya...", e);
-                nextVideo();
-            });
+            // Parameter shuffle=1 & loop=1 untuk auto-loop playlist tanpa henti
+            let embedUrl = `https://www.youtube-nocookie.com/embed?listType=playlist&list=${playlistId}&autoplay=1&mute=1&loop=1&shuffle=1&index=${randomIndex}&enablejsapi=1&rel=0`;
 
-            videoPlayer.onended = () => {
-                nextVideo();
-            };
-
-            videoPlayer.onerror = () => {
-                console.warn("Ralat fail video. Lompat ke video seterusnya.");
-                setTimeout(nextVideo, 2000);
-            };
+            youtubePlayer.src = embedUrl;
         }
 
-        function nextVideo() {
-            if(!dashboardData.videos || dashboardData.videos.length === 0) return;
-            currentVideoIndex = (currentVideoIndex + 1) % dashboardData.videos.length;
-            playCurrentVideo();
-        }
-
-        function pauseCurrentVideo() {
-            if(videoPlayer) videoPlayer.pause();
+        function muteYouTubePlayer(shouldMute) {
+            // Mengawal iframe YouTube dengan API postMessage
+            if (youtubePlayer && youtubePlayer.contentWindow) {
+                let action = shouldMute ? 'mute' : 'unMute';
+                youtubePlayer.contentWindow.postMessage(JSON.stringify({
+                    'event': 'command',
+                    'func': action,
+                    'args': []
+                }), '*');
+            }
         }
 
         let combinedRotatorItems = [];
