@@ -78,27 +78,29 @@
             animation: pulse 1.5s infinite;
         }
 
-        /* 1. HEADER DENGAN LOGO (9vh) */
+        /* 1. HEADER DENGAN WAKTU SOLAT MENDATAR (11vh) */
         header {
-            height: 9vh;
+            height: 11vh;
             background-color: var(--bg-card-dark);
             border-bottom: 4px solid var(--bright-red);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 25px;
+            padding: 0 20px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
             z-index: 10;
+            gap: 15px;
         }
 
         .header-title-container {
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 12px;
+            flex-shrink: 0;
         }
 
         .header-logo {
-            height: clamp(40px, 6vh, 60px);
+            height: clamp(38px, 5.5vh, 55px);
             width: auto;
             object-fit: contain;
             background: #ffffff;
@@ -108,51 +110,91 @@
         }
 
         .header-title h1 {
-            font-size: clamp(1.4rem, 2.2vw, 2.2rem);
+            font-size: clamp(1.2rem, 1.6vw, 1.8rem);
             font-weight: 900;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
             color: var(--bright-red);
             text-shadow: 0 0 10px var(--bright-red-glow);
             line-height: 1.1;
         }
 
         .header-title p {
-            font-size: clamp(0.85rem, 1.1vw, 1.2rem);
+            font-size: clamp(0.75rem, 0.9vw, 1rem);
             color: var(--text-muted);
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 1px;
             font-weight: 700;
+        }
+
+        /* WAKTU SOLAT DI HEADER (MENDATAR) */
+        .header-prayer-bar {
+            display: flex;
+            align-items: center;
+            background: rgba(6, 78, 59, 0.85);
+            border: 2px solid var(--islamic-gold);
+            border-radius: 10px;
+            padding: 4px 10px;
+            gap: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            flex: 1;
+            max-width: 48%;
+            justify-content: space-around;
+        }
+
+        .header-prayer-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2px 6px;
+            border-radius: 6px;
+            background: rgba(0, 0, 0, 0.25);
+            min-width: 60px;
+        }
+
+        .header-prayer-item .p-name {
+            font-size: clamp(0.65rem, 0.8vw, 0.9rem);
+            font-weight: 800;
+            color: var(--text-main);
+            text-transform: uppercase;
+        }
+
+        .header-prayer-item .p-time {
+            font-size: clamp(0.85rem, 1.1vw, 1.25rem);
+            font-weight: 900;
+            color: var(--islamic-gold);
         }
 
         .datetime-container {
             text-align: right;
+            flex-shrink: 0;
         }
 
         .clock-time {
-            font-size: clamp(1.8rem, 2.8vw, 2.8rem);
+            font-size: clamp(1.6rem, 2.3vw, 2.4rem);
             font-weight: 900;
             color: var(--islamic-gold);
             line-height: 1;
         }
 
         .clock-date {
-            font-size: clamp(0.9rem, 1.2vw, 1.3rem);
+            font-size: clamp(0.8rem, 1vw, 1.1rem);
             color: var(--text-main);
             font-weight: 700;
         }
 
-        /* 2. KAWASAN UTAMA (91vh) */
+        /* 2. KAWASAN UTAMA (89vh) */
         main {
-            height: 91vh;
+            height: 89vh;
             display: flex;
             flex-direction: column;
             padding: 12px 18px;
             gap: 12px;
         }
 
-        /* BAHAGIAN ATAS: Video (60%), Solat (20%) & Staf (20%) */
+        /* BAHAGIAN ATAS: Video (60%), Kad QR Code (20%) & Staf (20%) */
         .top-section {
-            height: 59vh;
+            height: 58vh;
             display: flex;
             gap: 12px;
         }
@@ -190,15 +232,52 @@
             z-index: 20;
         }
 
-        .prayer-card {
+        /* KAD QR CODE (ENGAGEMENT / IMBASAN PESAKIT) */
+        .qr-card {
             width: 20%;
-            background-color: var(--islamic-green);
+            background-color: var(--bg-card-dark);
             border-radius: 12px;
-            padding: 12px 15px;
+            padding: 12px;
             box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
-            border: 2px solid var(--islamic-gold);
+            border: 2px solid var(--hospital-blue);
             display: flex;
             flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            text-align: center;
+        }
+
+        .qr-card .panel-title {
+            color: var(--hospital-blue);
+            border-bottom-color: rgba(144, 224, 239, 0.4);
+            margin-bottom: 4px;
+        }
+
+        .qr-image-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #ffffff;
+            padding: 8px;
+            border-radius: 10px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
+            margin: 6px 0;
+            width: 100%;
+            max-height: 75%;
+        }
+
+        .qr-image-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .qr-card p {
+            font-size: clamp(0.75rem, 0.95vw, 1.1rem);
+            font-weight: 800;
+            color: var(--text-main);
+            line-height: 1.2;
         }
 
         .staff-card {
@@ -215,7 +294,7 @@
 
         .panel-title {
             text-align: center;
-            font-size: clamp(1rem, 1.2vw, 1.3rem);
+            font-size: clamp(0.95rem, 1.1vw, 1.25rem);
             text-transform: uppercase;
             font-weight: 900;
             margin-bottom: 8px;
@@ -228,28 +307,6 @@
             color: var(--bright-red);
             border-bottom-color: rgba(255, 0, 51, 0.4);
         }
-
-        .prayer-list {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            flex: 1;
-            justify-content: space-around;
-        }
-
-        .prayer-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(0, 0, 0, 0.35);
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-size: clamp(1rem, 1.2vw, 1.3rem);
-            font-weight: 800;
-            color: #ffffff;
-        }
-
-        .prayer-item .time { color: var(--islamic-gold); }
 
         .shift-badge {
             display: inline-block;
@@ -482,7 +539,7 @@
     <audio id="audio-quran"></audio>
     <audio id="audio-azan"></audio>
 
-    <!-- HEADER DENGAN LOGO -->
+    <!-- HEADER DENGAN LOGO & WAKTU SOLAT MENDATAR -->
     <header>
         <div class="header-title-container">
             <img src="https://lh3.googleusercontent.com/d/1H9tWnlDLzJpuH8iLClw2zbRIRF0FXqtK" alt="Logo KKM" class="header-logo" onerror="this.style.display='none'">
@@ -491,6 +548,17 @@
                 <p>Hospital Kuala Nerang, Kedah</p>
             </div>
         </div>
+
+        <!-- WAKTU SOLAT MENDATAR DI HEADER -->
+        <div class="header-prayer-bar">
+            <div class="header-prayer-item" id="prayer-Subuh"><span class="p-name">Subuh</span><span class="p-time time">-</span></div>
+            <div class="header-prayer-item" id="prayer-Syuruk"><span class="p-name">Syuruk</span><span class="p-time time">-</span></div>
+            <div class="header-prayer-item" id="prayer-Zohor"><span class="p-name">Zohor</span><span class="p-time time">-</span></div>
+            <div class="header-prayer-item" id="prayer-Asar"><span class="p-name">Asar</span><span class="p-time time">-</span></div>
+            <div class="header-prayer-item" id="prayer-Maghrib"><span class="p-name">Maghrib</span><span class="p-time time">-</span></div>
+            <div class="header-prayer-item" id="prayer-Isyak"><span class="p-name">Isyak</span><span class="p-time time">-</span></div>
+        </div>
+
         <div class="datetime-container">
             <div class="clock-time" id="clock-time">00:00:00 AM</div>
             <div class="clock-date" id="clock-date">-- -- ----</div>
@@ -500,8 +568,8 @@
     <!-- KAWASAN UTAMA -->
     <main>
         <div class="top-section">
-            <!-- Video Box (Hybrid YouTube & Fallback MP4) -->
-            <div class="video-box" id="video-box">
+            <!-- Video Box (YouTube Player) -->
+            <div class="video-box">
                 <iframe id="youtube-player" 
                         allow="autoplay; encrypted-media; picture-in-picture" 
                         referrerpolicy="strict-origin-when-cross-origin" 
@@ -510,17 +578,13 @@
                 <div class="audio-indicator" id="audio-indicator">🔊 Sedang Memainkan Bacaan Al-Quran...</div>
             </div>
 
-            <!-- Waktu Solat -->
-            <div class="prayer-card">
-                <div class="panel-title">Waktu Solat KDH03</div>
-                <div class="prayer-list" id="prayer-list">
-                    <div class="prayer-item" id="prayer-Subuh"><span>Subuh</span><span class="time">-</span></div>
-                    <div class="prayer-item" id="prayer-Syuruk"><span>Syuruk</span><span class="time">-</span></div>
-                    <div class="prayer-item" id="prayer-Zohor"><span>Zohor</span><span class="time">-</span></div>
-                    <div class="prayer-item" id="prayer-Asar"><span>Asar</span><span class="time">-</span></div>
-                    <div class="prayer-item" id="prayer-Maghrib"><span>Maghrib</span><span class="time">-</span></div>
-                    <div class="prayer-item" id="prayer-Isyak"><span>Isyak</span><span class="time">-</span></div>
+            <!-- Kad QR Code IMBASAN / MAKLUMAT -->
+            <div class="qr-card">
+                <div class="panel-title">IMBAS UNTUK MAKLUMAT</div>
+                <div class="qr-image-container">
+                    <img id="qr-code-img" src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=https://hkn.moh.gov.my" alt="QR Code HKN">
                 </div>
+                <p id="qr-code-desc">Imbas Kod QR Bagi Pendaftaran & Panduan Pesakit</p>
             </div>
 
             <!-- Staf Bertugas -->
@@ -528,15 +592,15 @@
                 <div class="panel-title">Pegawai Bertugas <span class="shift-badge" id="current-shift-badge">PAGI</span></div>
                 <div class="staff-list">
                     <div class="staff-item">
-                        <div class="staff-role">Pegawai Perubatan (MO)</div>
+                        <div class="staff-role">MEDICAL OFFICER</div>
                         <div class="staff-names-container" id="staff-mo">-</div>
                     </div>
                     <div class="staff-item">
-                        <div class="staff-role">Penolong Pegawai Perubatan (MA)</div>
+                        <div class="staff-role">MEDICAL ASSISTANT</div>
                         <div class="staff-names-container" id="staff-ma">-</div>
                     </div>
                     <div class="staff-item">
-                        <div class="staff-role">Jururawat Bertugas (SN)</div>
+                        <div class="staff-role">STAFF NURSE</div>
                         <div class="staff-names-container" id="staff-sn">-</div>
                     </div>
                 </div>
@@ -579,8 +643,6 @@
     <!-- LOGIK JAVASCRIPT -->
     <script>
         const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyVPT9S6zwOQjUORDge2sl6hHnrn9rJmf3uftmd8_VDxwSvklRLywu26fBn7sQR0MW32w/exec"; 
-        
-        // SINGLE VIDEO / PLAYLIST YOUTUBE YANG DIJAMIN DIPERBOLEHKAN EMBED (KKM / MALAYSIA)
         let defaultPlaylistID = "PLMDNGtzvgdI0"; 
 
         let dashboardData = {
@@ -592,6 +654,7 @@
                 malam: { mo: "-", ma: "-", sn: "-" }
             },
             youtubePlaylist: "https://www.youtube.com/watch?v=AaBF4oKLQZs&list=PLMDNGtzvgdI0",
+            qrCodeUrl: "",
             quran: [
                 { arabic: "وَإِذَا مَرِضْتُ فَهُوَ يَشْفِينِ", bm: "Dan apabila aku sakit, Dialah yang menyembuhkan aku. (Asy-Syu'ara: 80)" },
                 { arabic: "فَإِنَّ مَعَ الْعُسْرِ يُسْرًا", bm: "Maka sesungguhnya bersama kesulitan itu ada kemudahan. (Al-Insyirah: 5)" }
@@ -779,11 +842,9 @@
 
         audioAzan.onended = () => { resetToVideoNormal(); };
 
-        // EKSTRAK ID YOUTUBE (PLAYLIST / SINGLE VIDEO)
         function extractPlaylistId(input) {
             if (!input) return { type: 'playlist', id: defaultPlaylistID };
             
-            // Semak jika ia adalah Video Tunggal (watch?v=ID)
             let videoMatch = input.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
             let playlistMatch = input.match(/[&?]list=([a-zA-Z0-9_-]+)/);
 
@@ -809,7 +870,6 @@
                 let randomIndex = Math.floor(Math.random() * 10);
                 embedUrl = `https://www.youtube-nocookie.com/embed?listType=playlist&list=${ytInfo.id}&autoplay=1&mute=1&loop=1&shuffle=1&index=${randomIndex}&enablejsapi=1&rel=0`;
             } else {
-                // Untuk Single Video Loop
                 embedUrl = `https://www.youtube-nocookie.com/embed/${ytInfo.id}?autoplay=1&mute=1&loop=1&playlist=${ytInfo.id}&enablejsapi=1&rel=0`;
             }
 
@@ -839,6 +899,11 @@
                 document.getElementById('val-green').textContent = dashboardData.patients.green || 0;
                 document.getElementById('val-asthma').textContent = dashboardData.patients.asthma || 0;
                 document.getElementById('val-obs').textContent = dashboardData.patients.observation || 0;
+            }
+
+            // KEMASKINI QR CODE JIKA ADA URL DARI SHEETS
+            if(dashboardData.qrCodeUrl && dashboardData.qrCodeUrl.trim() !== "") {
+                document.getElementById('qr-code-img').src = dashboardData.qrCodeUrl;
             }
 
             const rotatorPanel = document.getElementById('rotator-panel');
