@@ -188,15 +188,15 @@
         }
 
         main {
-            height: 89vh;
+            height: 85vh;
             display: flex;
             flex-direction: column;
-            padding: 12px 18px;
-            gap: 12px;
+            padding: 10px 18px;
+            gap: 10px;
         }
 
         .top-section {
-            height: 58vh;
+            height: 56vh;
             display: flex;
             gap: 12px;
         }
@@ -380,7 +380,7 @@
         }
 
         .bottom-section {
-            height: 28vh;
+            height: 27vh;
             display: flex;
             gap: 12px;
         }
@@ -537,6 +537,21 @@
             text-shadow: 1px 1px 2px #000;
         }
 
+        /* BAHAGIAN FOOTER (4vh) */
+        footer {
+            height: 4vh;
+            background-color: var(--bg-card-dark);
+            border-top: 2px solid var(--bright-red);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-muted);
+            font-size: clamp(0.7rem, 0.85vw, 1rem);
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            z-index: 10;
+        }
+
         @keyframes blink {
             0%, 100% { 
                 opacity: 1; 
@@ -672,6 +687,11 @@
             <div class="rotator-panel" id="rotator-panel"></div>
         </div>
     </main>
+
+    <!-- FOOTER HAK Cipta -->
+    <footer>
+        © 2026 Yassin Razak. All Rights Reserved.
+    </footer>
 
     <script>
         const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyVPT9S6zwOQjUORDge2sl6hHnrn9rJmf3uftmd8_VDxwSvklRLywu26fBn7sQR0MW32w/exec"; 
