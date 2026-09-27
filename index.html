@@ -537,7 +537,7 @@
             text-shadow: 1px 1px 2px #000;
         }
 
-        /* BAHAGIAN FOOTER (4vh) */
+        /* BAHAGIAN FOOTER */
         footer {
             height: 4vh;
             background-color: var(--bg-card-dark);
@@ -729,11 +729,9 @@
             isAudioUnlocked = true;
             document.getElementById('audio-overlay').style.display = 'none';
             
-            // Tetapkan isipadu maksima 100%
             audioQuran.volume = 1.0;
             audioAzan.volume = 1.0;
 
-            // Nyah-sekat pelayar (Browser Context Warmup)
             audioQuran.play().then(() => { audioQuran.pause(); audioQuran.currentTime = 0; }).catch(() => {});
             audioAzan.play().then(() => { audioAzan.pause(); audioAzan.currentTime = 0; }).catch(() => {});
 
@@ -824,7 +822,7 @@
             checkAudioLogic(now);
         }
 
-        /* LOGIK PEMUTARAN AUDIO QURAN 10 MINIT SEBELUM SOLAT & AZAN */
+        /* LOGIK PEMUTARAN AUDIO QURAN 20 MINIT SEBELUM SOLAT & AZAN TEPAT WAKTU */
         function checkAudioLogic(now) {
             if(Object.keys(prayerTimesData).length === 0 || !isAudioUnlocked) return;
 
@@ -846,8 +844,8 @@
                     if(prayerDiv) prayerDiv.classList.remove('blinking');
                 }
 
-                // 1. FASA BACAAN QURAN: 10 MINIT SEBELUM SOLAT (600 saat > diffSeconds > 0)
-                if (diffSeconds <= 600 && diffSeconds > 0) {
+                // 1. FASA BACAAN QURAN: 20 MINIT SEBELUM SOLAT (1200 saat > diffSeconds > 0)
+                if (diffSeconds <= 1200 && diffSeconds > 0) {
                     inPrayerPhase = true;
                     
                     if (currentQuranSolatName !== solat) {
@@ -971,6 +969,7 @@
         let combinedRotatorItems = [];
         let combinedIndex = 0;
 
+        /* PENGEDARAN BERSELANG-SELI PENGUMUMAN DAN AYAT AL-QURAN */
         function updateDashboardUI() {
             if(dashboardData.patients) {
                 document.getElementById('val-red').textContent = dashboardData.patients.red || 0;
@@ -984,22 +983,24 @@
             rotatorPanel.innerHTML = '';
             combinedRotatorItems = [];
 
-            if(dashboardData.announcements && dashboardData.announcements.length > 0) {
-                dashboardData.announcements.forEach(ann => {
-                    combinedRotatorItems.push({
-                        type: 'announcement',
-                        html: `<h2>📢 INFO / MAKLUMAN</h2><p>${ann}</p>`
-                    });
-                });
-            }
+            let annList = dashboardData.announcements || [];
+            let quranList = dashboardData.quran || [];
+            
+            let annItems = annList.map(ann => ({
+                type: 'announcement',
+                html: `<h2>📢 INFO / MAKLUMAN</h2><p>${ann}</p>`
+            }));
 
-            if(dashboardData.quran && dashboardData.quran.length > 0) {
-                dashboardData.quran.forEach(q => {
-                    combinedRotatorItems.push({
-                        type: 'quran',
-                        html: `<h2>📖 AYAT SUCI AL-QURAN</h2><div class="quran-arabic">${q.arabic}</div><div class="quran-bm">${q.bm}</div>`
-                    });
-                });
+            let quranItems = quranList.map(q => ({
+                type: 'quran',
+                html: `<h2>📖 AYAT SUCI AL-QURAN</h2><div class="quran-arabic">${q.arabic}</div><div class="quran-bm">${q.bm}</div>`
+            }));
+
+            // Susun secara berselang-seli (Alternating / Interleaved)
+            let maxLen = Math.max(annItems.length, quranItems.length);
+            for (let i = 0; i < maxLen; i++) {
+                if (i < annItems.length) combinedRotatorItems.push(annItems[i]);
+                if (i < quranItems.length) combinedRotatorItems.push(quranItems[i]);
             }
 
             if (combinedRotatorItems.length === 0) {
@@ -1030,7 +1031,7 @@
             await fetchDashboardData();
             
             setInterval(updateClockAndLogic, 1000);   
-            setInterval(rotateContent, 15000);        
+            setInterval(rotateContent, 10000); // Paparan berselang-seli diputar setiap 10 saat
             setInterval(fetchDashboardData, 5000);    
         };
     </script>
