@@ -591,8 +591,8 @@
         <button onclick="enableAudioSystem()">🚨 MULA DISPLAY & AKTIFKAN AUDIO</button>
     </div>
 
-    <audio id="audio-quran" preload="auto"></audio>
-    <audio id="audio-azan" preload="auto"></audio>
+    <audio id="audio-quran" preload="auto" crossorigin="anonymous"></audio>
+    <audio id="audio-azan" preload="auto" crossorigin="anonymous"></audio>
 
     <header>
         <div class="header-title-container">
@@ -732,10 +732,19 @@
             audioQuran.volume = 1.0;
             audioAzan.volume = 1.0;
 
-            audioQuran.play().then(() => { audioQuran.pause(); audioQuran.currentTime = 0; }).catch(() => {});
-            audioAzan.play().then(() => { audioAzan.pause(); audioAzan.currentTime = 0; }).catch(() => {});
+            // Membuka kunci konteks audio browser (Warmup AudioContext)
+            playDummyAudio(audioQuran);
+            playDummyAudio(audioAzan);
 
             loadYouTubePlaylist();
+        }
+
+        function playDummyAudio(audioEl) {
+            audioEl.src = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==";
+            audioEl.play().then(() => {
+                audioEl.pause();
+                audioEl.currentTime = 0;
+            }).catch(() => {});
         }
 
         async function fetchDashboardData() {
@@ -822,7 +831,7 @@
             checkAudioLogic(now);
         }
 
-        /* LOGIK PEMUTARAN AUDIO QURAN 20 MINIT SEBELUM SOLAT & AZAN TEPAT WAKTU */
+        /* LOGIK PEMUTARAN AUDIO QURAN 20 MINIT SEBELUM SOLAT & AZAN TEPAT WAKTU (FIXED PLAYBACK) */
         function checkAudioLogic(now) {
             if(Object.keys(prayerTimesData).length === 0 || !isAudioUnlocked) return;
 
@@ -860,12 +869,14 @@
                         const solatKey = solat.toLowerCase();
                         audioQuran.src = `quran_${solatKey}.mp3`;
                         audioQuran.volume = 1.0;
-                        audioQuran.currentTime = 0;
+                        audioQuran.load(); // Reload sumber audio baru secara paksa
                         
                         let playPromise = audioQuran.play();
                         if (playPromise !== undefined) {
                             playPromise.catch(error => {
-                                console.warn(`Peringatan: Fail quran_${solatKey}.mp3 tidak ditemui atau disekat oleh pelayar.`, error);
+                                console.warn(`Peringatan: Gagal memutarkan quran_${solatKey}.mp3.`, error);
+                                // Mencuba semula jika disekat
+                                setTimeout(() => { audioQuran.play().catch(()=>{}); }, 1000);
                             });
                         }
                     }
@@ -889,12 +900,13 @@
                     const azanFile = (solat === 'Subuh') ? 'azan_subuh.mp3' : 'azan_lain.mp3';
                     audioAzan.src = azanFile;
                     audioAzan.volume = 1.0;
-                    audioAzan.currentTime = 0;
+                    audioAzan.load();
 
                     let azanPromise = audioAzan.play();
                     if (azanPromise !== undefined) {
                         azanPromise.catch(error => {
                             console.warn("Peringatan: Fail Azan .mp3 tidak ditemui.", error);
+                            setTimeout(() => { audioAzan.play().catch(()=>{}); }, 1000);
                         });
                     }
                 }
@@ -996,7 +1008,6 @@
                 html: `<h2>📖 AYAT SUCI AL-QURAN</h2><div class="quran-arabic">${q.arabic}</div><div class="quran-bm">${q.bm}</div>`
             }));
 
-            // Susun secara berselang-seli (Alternating / Interleaved)
             let maxLen = Math.max(annItems.length, quranItems.length);
             for (let i = 0; i < maxLen; i++) {
                 if (i < annItems.length) combinedRotatorItems.push(annItems[i]);
