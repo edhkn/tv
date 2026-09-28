@@ -752,7 +752,6 @@
         async function fetchDashboardData() {
             try {
                 if(GAS_WEB_APP_URL && !GAS_WEB_APP_URL.includes("INSERT_YOUR")) {
-                    // Pancing cache pelayar dengan parameter timestamp unik
                     const res = await fetch(`${GAS_WEB_APP_URL}?t=${new Date().getTime()}`, {
                         cache: 'no-store'
                     });
@@ -847,13 +846,11 @@
             document.getElementById('clock-time').textContent = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true });
             document.getElementById('clock-date').textContent = now.toLocaleDateString('ms-MY', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-            // LOGIK AUTO-RELOAD HARIAN (SEKALI PADA JAM 12:01 AM SETIAP HARI BAHARU)
             const todayStr = now.toDateString();
             if (currentDateString !== "" && currentDateString !== todayStr) {
                 currentDateString = todayStr;
                 currentQuranSolatName = "";
                 currentAzanSolatName = "";
-                // Muat semula halaman TV untuk dapatkan waktu solat & memori browser yang bersih
                 window.location.reload(true);
                 return;
             } else if (currentDateString === "") {
@@ -1067,9 +1064,19 @@
             }
         }
 
+        // FUNGSI FISHER-YATES SHUFFLE UNTUK RAWAKKAN TATASUSUNAN
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
         let combinedRotatorItems = [];
         let combinedIndex = 0;
 
+        /* PENGEDARAN RAWAK SEPENUHNYA PENGUMUMAN DAN AYAT AL-QURAN */
         function updateDashboardUI() {
             if(dashboardData.patients) {
                 document.getElementById('val-red').textContent = dashboardData.patients.red || 0;
@@ -1096,13 +1103,13 @@
                 html: `<h2>📖 AYAT SUCI AL-QURAN</h2><div class="quran-arabic">${q.arabic}</div><div class="quran-bm">${q.bm}</div>`
             }));
 
-            let maxLen = Math.max(annItems.length, quranItems.length);
-            for (let i = 0; i < maxLen; i++) {
-                if (i < annItems.length) combinedRotatorItems.push(annItems[i]);
-                if (i < quranItems.length) combinedRotatorItems.push(quranItems[i]);
-            }
+            // Gabungkan semua item pengumuman & Al-Quran ke dalam satu senarai
+            combinedRotatorItems = annItems.concat(quranItems);
 
-            if (combinedRotatorItems.length === 0) {
+            // Gaulkan tatasusunan secara rawak sepenuhnya
+            if (combinedRotatorItems.length > 0) {
+                combinedRotatorItems = shuffleArray(combinedRotatorItems);
+            } else {
                 combinedRotatorItems.push({
                     type: 'info',
                     html: `<h2>📢 INFO / MAKLUMAN</h2><p>Selamat Datang ke Unit Kecemasan & Trauma Hospital Kuala Nerang</p>`
@@ -1130,7 +1137,7 @@
             await fetchDashboardData();
             
             setInterval(updateClockAndLogic, 1000);   
-            setInterval(rotateContent, 10000); 
+            setInterval(rotateContent, 10000); // Rotasi rawak bertukar setiap 10 saat
             setInterval(fetchDashboardData, 5000);    
         };
     </script>
