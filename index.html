@@ -846,6 +846,7 @@
             document.getElementById('clock-time').textContent = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true });
             document.getElementById('clock-date').textContent = now.toLocaleDateString('ms-MY', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
+            // LOGIK MIDNIGHT REFRESH (12:01 AM HARIAN)
             const todayStr = now.toDateString();
             if (currentDateString !== "" && currentDateString !== todayStr) {
                 currentDateString = todayStr;
@@ -1064,7 +1065,6 @@
             }
         }
 
-        // FUNGSI FISHER-YATES SHUFFLE UNTUK RAWAKKAN TATASUSUNAN
         function shuffleArray(array) {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -1076,7 +1076,6 @@
         let combinedRotatorItems = [];
         let combinedIndex = 0;
 
-        /* PENGEDARAN RAWAK SEPENUHNYA PENGUMUMAN DAN AYAT AL-QURAN */
         function updateDashboardUI() {
             if(dashboardData.patients) {
                 document.getElementById('val-red').textContent = dashboardData.patients.red || 0;
@@ -1103,10 +1102,8 @@
                 html: `<h2>📖 AYAT SUCI AL-QURAN</h2><div class="quran-arabic">${q.arabic}</div><div class="quran-bm">${q.bm}</div>`
             }));
 
-            // Gabungkan semua item pengumuman & Al-Quran ke dalam satu senarai
             combinedRotatorItems = annItems.concat(quranItems);
 
-            // Gaulkan tatasusunan secara rawak sepenuhnya
             if (combinedRotatorItems.length > 0) {
                 combinedRotatorItems = shuffleArray(combinedRotatorItems);
             } else {
@@ -1137,7 +1134,7 @@
             await fetchDashboardData();
             
             setInterval(updateClockAndLogic, 1000);   
-            setInterval(rotateContent, 20000); // Rotasi rawak bertukar setiap 10 saat
+            setInterval(rotateContent, 10000); 
             setInterval(fetchDashboardData, 5000);    
         };
     </script>
