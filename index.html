@@ -801,6 +801,32 @@
             return `${hour}:${parts[1]} ${ampm}`;
         }
 
+        function normalizeTo24Hour(timeStr, solatName) {
+            if (!timeStr) return "00:00";
+            let str = String(timeStr).trim().toLowerCase();
+            let isPM = str.includes('pm');
+            let isAM = str.includes('am');
+            
+            str = str.replace('am', '').replace('pm', '').trim();
+            let parts = str.split(':');
+            if (parts.length >= 2) {
+                let h = parseInt(parts[0], 10);
+                let m = parts[1].padStart(2, '0');
+
+                if (isPM && h < 12) h += 12;
+                if (isAM && h === 12) h = 0;
+
+                if (!isPM && !isAM) {
+                    if ((solatName === 'Zohor' || solatName === 'Asar' || solatName === 'Maghrib' || solatName === 'Isyak') && h < 11) {
+                        h += 12;
+                    }
+                }
+
+                return `${String(h).padStart(2, '0')}:${m}`;
+            }
+            return timeStr;
+        }
+
         function renderStackedStaffNames(elementId, nameString) {
             const container = document.getElementById(elementId);
             if (!container) return;
@@ -857,7 +883,8 @@
                 for (let solat in prayerTimesData) {
                     if (solat === 'Syuruk' || !prayerTimesData[solat] || prayerTimesData[solat] === "00:00") continue; 
 
-                    let parts = prayerTimesData[solat].split(':');
+                    let time24 = normalizeTo24Hour(prayerTimesData[solat], solat);
+                    let parts = time24.split(':');
                     const prayerInSeconds = (parseInt(parts[0], 10) * 3600) + (parseInt(parts[1], 10) * 60);
                     const diffSeconds = prayerInSeconds - nowInSeconds;
                     const prayerDiv = document.getElementById(`prayer-${solat}`);
@@ -1106,8 +1133,9 @@
             await fetchDashboardData();
             
             setInterval(updateClockAndLogic, 1000);   
-            setInterval(rotateContent, 20000); 
-            setInterval(fetchDashboardData, 5000);    
+            setInterval(rotateContent, 10000); 
+            setInterval(fetchDashboardData, 5000); 
+            setInterval(fetchDashboardData, 3600000); // REFRESH PAKSA WAKTU SOLAT DARI BACKEND SETIAP SEJAM
         };
     </script>
 </body>
