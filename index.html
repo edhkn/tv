@@ -724,7 +724,7 @@
         let currentQuranSolatName = "";
         let currentAzanSolatName = "";
         let lastZikirHourPlayed = -1; 
-        let currentDateString = ""; // Pengesan Hari Baharu (Midnight Tracker)
+        let currentDateString = ""; 
 
         function enableAudioSystem() {
             isAudioUnlocked = true;
@@ -752,7 +752,10 @@
         async function fetchDashboardData() {
             try {
                 if(GAS_WEB_APP_URL && !GAS_WEB_APP_URL.includes("INSERT_YOUR")) {
-                    const res = await fetch(`${GAS_WEB_APP_URL}?t=${new Date().getTime()}`);
+                    // Pancing cache pelayar dengan parameter timestamp unik
+                    const res = await fetch(`${GAS_WEB_APP_URL}?t=${new Date().getTime()}`, {
+                        cache: 'no-store'
+                    });
                     const data = await res.json();
                     
                     if(data) {
@@ -793,7 +796,7 @@
         function formatTime12(time24) {
             if(!time24 || time24 === "00:00") return "--:--";
             let parts = time24.split(':');
-            let hour = parseInt(parts[0]);
+            let hour = parseInt(parts[0], 10);
             let ampm = hour >= 12 ? 'PM' : 'AM';
             hour = hour % 12 || 12;
             return `${hour}:${parts[1]} ${ampm}`;
@@ -844,13 +847,15 @@
             document.getElementById('clock-time').textContent = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true });
             document.getElementById('clock-date').textContent = now.toLocaleDateString('ms-MY', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-            // LOGIK MIDNIGHT REFRESH (PADA JAM 12:01 AM SETIAP HARI BAHARU)
+            // LOGIK AUTO-RELOAD HARIAN (SEKALI PADA JAM 12:01 AM SETIAP HARI BAHARU)
             const todayStr = now.toDateString();
             if (currentDateString !== "" && currentDateString !== todayStr) {
                 currentDateString = todayStr;
                 currentQuranSolatName = "";
                 currentAzanSolatName = "";
-                fetchDashboardData(); // Memaksa kemaskini Waktu Solat Hari Baharu dari JAKIM
+                // Muat semula halaman TV untuk dapatkan waktu solat & memori browser yang bersih
+                window.location.reload(true);
+                return;
             } else if (currentDateString === "") {
                 currentDateString = todayStr;
             }
