@@ -240,7 +240,6 @@
             gap: 10px;
         }
 
-        /* KOTAK FACEBOOK QR MELINTANG */
         .facebook-card-horizontal {
             height: 32%;
             background-color: var(--bg-card-dark);
@@ -272,10 +271,6 @@
             text-align: left;
         }
 
-        .fb-horiz-info .fb-badge {
-            align-self: flex-start;
-        }
-
         .fb-horiz-info p {
             font-size: clamp(0.75rem, 0.9vw, 1.05rem);
             font-weight: 800;
@@ -283,7 +278,6 @@
             line-height: 1.2;
         }
 
-        /* KOTAK PEGAWAI BERTUGAS DI BAWAH FACEBOOK QR */
         .staff-card-below {
             height: 68%;
             background-color: var(--bg-card-dark);
@@ -456,7 +450,6 @@
         .bg-asthma { background-color: var(--zone-asthma); }
         .bg-obs { background-color: var(--zone-obs); }
 
-        /* KOTAK AYAT AL-QURAN KHAS (SEBELAH KIRI BAWAH) */
         .quran-rotator-panel {
             width: 25%;
             background-color: var(--bg-card-dark);
@@ -468,7 +461,6 @@
             border-left: 5px solid var(--islamic-gold);
         }
 
-        /* KOTAK PENGUMUMAN KHAS (SEBELAH KANAN BAWAH) */
         .announce-rotator-panel {
             width: 25%;
             background-color: var(--bg-card-dark);
@@ -642,7 +634,6 @@
             </div>
 
             <div class="right-top-container">
-                <!-- KOTAK FACEBOOK QR MELINTANG -->
                 <div class="facebook-card-horizontal">
                     <img class="fb-qr-img-horiz" src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://www.facebook.com/share/199ijRaqcr/" alt="QR Facebook HKN">
                     <div class="fb-horiz-info">
@@ -651,7 +642,6 @@
                     </div>
                 </div>
 
-                <!-- KOTAK PEGAWAI BERTUGAS -->
                 <div class="staff-card-below">
                     <div class="panel-title">Pegawai Bertugas <span class="shift-badge" id="current-shift-badge">PAGI</span></div>
                     <div class="staff-list">
@@ -699,10 +689,7 @@
                 </div>
             </div>
 
-            <!-- KOTAK AYAT AL-QURAN SAHAJA (BERSEBELAHAN STATUS PESAKIT) -->
             <div class="quran-rotator-panel" id="quran-rotator-panel"></div>
-
-            <!-- KOTAK PENGUMUMAN SAHAJA (SEBELAH KANAN) -->
             <div class="announce-rotator-panel" id="announce-rotator-panel"></div>
         </div>
     </main>
@@ -892,12 +879,13 @@
             checkAudioLogic(now);
         }
 
-        /* LOGIK PEMUTARAN AUDIO QURAN, AZAN & ZIKIR */
+        /* LOGIK PEMUTARAN AUDIO QURAN (20 MIN), AZAN & ZIKIR (DENGAN PERLINDUNGAN KEUTAMAAN QURAN) */
         function checkAudioLogic(now) {
             if(!isAudioUnlocked) return;
 
             const nowInSeconds = (now.getHours() * 3600) + (now.getMinutes() * 60) + now.getSeconds();
             let inPrayerPhase = false;
+            let isNearPrayerTime = false; // Pengesan jika hampir dengan waktu solat (kurang 25 minit)
 
             if (Object.keys(prayerTimesData).length > 0) {
                 for (let solat in prayerTimesData) {
@@ -909,6 +897,11 @@
                     const diffSeconds = prayerInSeconds - nowInSeconds;
                     const prayerDiv = document.getElementById(`prayer-${solat}`);
 
+                    // Sekat Zikir jika solat berada dalam lingkungan 25 minit (1500 saat)
+                    if (diffSeconds <= 1500 && diffSeconds > 0) {
+                        isNearPrayerTime = true;
+                    }
+
                     if (diffSeconds <= 300 && diffSeconds >= -300) {
                         if(prayerDiv && !prayerDiv.classList.contains('blinking')) prayerDiv.classList.add('blinking');
                     } else {
@@ -919,10 +912,11 @@
                         currentAzanSolatName = "";
                     }
 
-                    // 1. FASA QURAN: 20 MINIT SEBELUM SOLAT
+                    // 1. FASA QURAN: 20 MINIT SEBELUM SOLAT (1200 Saat)
                     if (diffSeconds <= 1200 && diffSeconds > 0) {
                         inPrayerPhase = true;
                         
+                        // Potong Zikir serta-merta jika sedang berbunyi
                         if (!audioZikir.paused) {
                             audioZikir.pause();
                             audioZikir.currentTime = 0;
@@ -951,7 +945,7 @@
                             }
                         }
                     }
-                    // 2. FASA AZAN TEPAT WAKTU
+                    // 2. FASA AZAN TEPAT WAKTU SOLAT
                     else if (diffSeconds <= 0 && diffSeconds >= -5 && currentAzanSolatName !== solat) {
                         inPrayerPhase = true;
                         currentAzanSolatName = solat;
@@ -988,16 +982,17 @@
                 }
             }
 
-            // 3. ZIKIR SETIAP GENAP JAM
+            // 3. ZIKIR SETIAP GENAP JAM (HANYA DIMAINKAN JIKA TIDAK HAMPIR WAKTU SOLAT / BACAAN QURAN)
             const currentHour = now.getHours();
             const minutes = now.getMinutes();
             const seconds = now.getSeconds();
 
-            if (!inPrayerPhase && minutes === 0 && seconds <= 3 && lastZikirHourPlayed !== currentHour) {
+            if (!inPrayerPhase && !isNearPrayerTime && minutes === 0 && seconds <= 3 && lastZikirHourPlayed !== currentHour) {
                 lastZikirHourPlayed = currentHour;
                 playRandomZikir();
             }
 
+            // RESET SEMULA YOUTUBE (UNMUTE) SETELAH TAMAT MP3
             if (!inPrayerPhase && isSpecialAudioPlaying && audioAzan.paused && audioQuran.paused && audioZikir.paused) {
                 resetToVideoNormal();
             }
@@ -1097,7 +1092,6 @@
         let quranIndex = 0;
         let announceIndex = 0;
 
-        /* PENGASINGAN PEROTASI AYAT AL-QURAN DAN PENGUMUMAN */
         function updateDashboardUI() {
             if(dashboardData.patients) {
                 document.getElementById('val-red').textContent = dashboardData.patients.red || 0;
@@ -1107,7 +1101,6 @@
                 document.getElementById('val-obs').textContent = dashboardData.patients.observation || 0;
             }
 
-            // 1. KOTAK QURAN SAHAJA
             const quranPanel = document.getElementById('quran-rotator-panel');
             quranPanel.innerHTML = '';
             quranRotatorItems = [];
@@ -1132,7 +1125,6 @@
                 quranPanel.appendChild(div);
             });
 
-            // 2. KOTAK PENGUMUMAN SAHAJA
             const announcePanel = document.getElementById('announce-rotator-panel');
             announcePanel.innerHTML = '';
             announceRotatorItems = [];
@@ -1159,7 +1151,6 @@
         }
 
         function rotateContent() {
-            // Rotasi Slaid Quran
             const quranSlides = document.querySelectorAll('.quran-slide');
             if(quranSlides.length > 0) {
                 quranSlides.forEach(s => s.classList.remove('active'));
@@ -1167,7 +1158,6 @@
                 quranSlides[quranIndex].classList.add('active');
             }
 
-            // Rotasi Slaid Pengumuman
             const announceSlides = document.querySelectorAll('.announce-slide');
             if(announceSlides.length > 0) {
                 announceSlides.forEach(s => s.classList.remove('active'));
@@ -1180,7 +1170,7 @@
             await fetchDashboardData();
             
             setInterval(updateClockAndLogic, 1000);   
-            setInterval(rotateContent, 10000); // Bertukar secara bebas setiap 10 saat
+            setInterval(rotateContent, 10000); 
             setInterval(fetchDashboardData, 5000); 
             setInterval(fetchDashboardData, 3600000); 
         };
