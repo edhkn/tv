@@ -194,7 +194,6 @@
             gap: 10px;
         }
 
-        /* BAHAGIAN ATAS: RATIO 60:40 (VIDEO:SLIDESHOW DRIVE) */
         .top-section {
             height: 56vh;
             display: flex;
@@ -234,7 +233,6 @@
             z-index: 20;
         }
 
-        /* KOTAK SLIDESHOW GAMBAR DRIVE (40% LEBAR) */
         .image-slideshow-box {
             width: 40%;
             background-color: var(--bg-card-dark);
@@ -963,6 +961,10 @@
                 "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https://www.facebook.com/share/199ijRaqcr/"
             ];
 
+            if (driveImageItems.length === 0) {
+                driveImageItems.push("https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https://www.facebook.com/share/199ijRaqcr/");
+            }
+
             driveImageItems.forEach((imgUrl, idx) => {
                 let div = document.createElement('div');
                 div.className = `image-slide ${idx === 0 ? 'active' : ''}`;
@@ -1051,7 +1053,7 @@
             await fetchDashboardData();
             
             setInterval(updateClockAndLogic, 1000);   
-            setInterval(rotateContent, 10000); // Bertukar setiap 10 saat
+            setInterval(rotateContent, 10000); // Pertukaran slaid setiap 10 saat
             setInterval(fetchDashboardData, 5000); 
             setInterval(fetchDashboardData, 3600000); 
         };
