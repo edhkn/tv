@@ -194,6 +194,7 @@
             gap: 10px;
         }
 
+        /* BAHAGIAN ATAS: RATIO 60:40 (VIDEO:SLIDESHOW DRIVE) */
         .top-section {
             height: 56vh;
             display: flex;
@@ -201,7 +202,7 @@
         }
 
         .video-box {
-            width: 65%;
+            width: 60%;
             background-color: #000;
             border-radius: 12px;
             overflow: hidden;
@@ -233,130 +234,41 @@
             z-index: 20;
         }
 
-        .right-top-container {
-            width: 35%;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .facebook-card-horizontal {
-            height: 32%;
+        /* KOTAK SLIDESHOW GAMBAR DRIVE (40% LEBAR) */
+        .image-slideshow-box {
+            width: 40%;
             background-color: var(--bg-card-dark);
             border-radius: 12px;
-            padding: 8px 12px;
+            border: 3px solid var(--hospital-blue);
             box-shadow: 0 8px 15px rgba(0, 0, 0, 0.5);
-            border: 2px solid var(--hospital-blue);
-            display: flex;
-            align-items: center;
-            gap: 12px;
+            position: relative;
             overflow: hidden;
-        }
-
-        .fb-qr-img-horiz {
-            background: #ffffff;
-            padding: 4px;
-            border-radius: 8px;
-            height: 90%;
-            width: auto;
-            aspect-ratio: 1/1;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-        }
-
-        .fb-horiz-info {
             display: flex;
-            flex-direction: column;
             justify-content: center;
-            gap: 4px;
-            text-align: left;
+            align-items: center;
         }
 
-        .fb-horiz-info p {
-            font-size: clamp(0.75rem, 0.9vw, 1.05rem);
-            font-weight: 800;
-            color: #ffffff;
-            line-height: 1.2;
-        }
-
-        .staff-card-below {
-            height: 68%;
-            background-color: var(--bg-card-dark);
-            border-radius: 12px;
-            padding: 10px 14px;
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.5);
-            border-top: 5px solid var(--bright-red);
-            border-left: 1px solid rgba(255, 0, 51, 0.3);
-            border-right: 1px solid rgba(255, 0, 51, 0.3);
+        .image-slide {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
             display: flex;
-            flex-direction: column;
-            overflow: hidden;
+            justify-content: center;
+            align-items: center;
+            padding: 8px;
         }
 
-        .panel-title {
-            text-align: center;
-            font-size: clamp(0.85rem, 1.05vw, 1.2rem);
-            text-transform: uppercase;
-            font-weight: 900;
-            margin-bottom: 6px;
-            color: var(--islamic-gold);
-            border-bottom: 2px solid rgba(251, 191, 36, 0.4);
-            padding-bottom: 4px;
+        .image-slide.active {
+            opacity: 1;
         }
 
-        .staff-card-below .panel-title {
-            color: var(--bright-red);
-            border-bottom-color: rgba(255, 0, 51, 0.4);
-            text-shadow: 0 0 8px var(--bright-red-glow);
-        }
-
-        .shift-badge {
-            display: inline-block;
-            background: var(--bright-red);
-            color: #ffffff;
-            padding: 2px 8px;
-            border-radius: 6px;
-            font-size: clamp(0.7rem, 0.85vw, 0.95rem);
-            margin-left: 5px;
-            vertical-align: middle;
-            font-weight: 900;
-        }
-
-        .staff-list {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            flex: 1;
-            justify-content: space-around;
-            overflow-y: auto;
-        }
-
-        .staff-item {
-            background: rgba(255, 255, 255, 0.08);
-            padding: 4px 8px;
+        .image-slide img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
             border-radius: 8px;
-            border-left: 4px solid var(--bright-red);
-        }
-
-        .staff-role { 
-            font-size: clamp(0.65rem, 0.8vw, 0.9rem); 
-            color: var(--hospital-blue); 
-            text-transform: uppercase; 
-            font-weight: 800; 
-            margin-bottom: 2px;
-        }
-
-        .staff-names-container {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-
-        .staff-name { 
-            font-size: clamp(0.8rem, 0.95vw, 1.1rem); 
-            font-weight: 800; 
-            color: #ffffff; 
-            line-height: 1.2;
-            text-shadow: 1px 1px 2px #000;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.6);
         }
 
         .bottom-section {
@@ -529,18 +441,6 @@
             text-shadow: 1px 1px 2px #000;
         }
 
-        .fb-badge {
-            background: #1877f2;
-            color: #ffffff;
-            padding: 3px 8px;
-            border-radius: 20px;
-            font-size: clamp(0.6rem, 0.75vw, 0.85rem);
-            font-weight: 900;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
-
         footer {
             height: 4vh;
             background-color: var(--bg-card-dark);
@@ -624,6 +524,7 @@
 
     <main>
         <div class="top-section">
+            <!-- SEBELAH KIRI: PLAYER YOUTUBE (60%) -->
             <div class="video-box">
                 <iframe id="youtube-player" 
                         allow="autoplay; encrypted-media; picture-in-picture" 
@@ -633,32 +534,9 @@
                 <div class="audio-indicator" id="audio-indicator">🔊 Sedang Memainkan Bacaan Al-Quran...</div>
             </div>
 
-            <div class="right-top-container">
-                <div class="facebook-card-horizontal">
-                    <img class="fb-qr-img-horiz" src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://www.facebook.com/share/199ijRaqcr/" alt="QR Facebook HKN">
-                    <div class="fb-horiz-info">
-                        <span class="fb-badge">👍 OFFICIAL FACEBOOK</span>
-                        <p>Imbas QR Code Untuk Melawat Facebook Rasmi HKN</p>
-                    </div>
-                </div>
-
-                <div class="staff-card-below">
-                    <div class="panel-title">Pegawai Bertugas <span class="shift-badge" id="current-shift-badge">PAGI</span></div>
-                    <div class="staff-list">
-                        <div class="staff-item">
-                            <div class="staff-role">MEDICAL OFFICER</div>
-                            <div class="staff-names-container" id="staff-mo">-</div>
-                        </div>
-                        <div class="staff-item">
-                            <div class="staff-role">MEDICAL ASSISTANT</div>
-                            <div class="staff-names-container" id="staff-ma">-</div>
-                        </div>
-                        <div class="staff-item">
-                            <div class="staff-role">STAFF NURSE</div>
-                            <div class="staff-names-container" id="staff-sn">-</div>
-                        </div>
-                    </div>
-                </div>
+            <!-- SEBELAH KANAN: SLIDESHOW GAMBAR GOOGLE DRIVE (40%) -->
+            <div class="image-slideshow-box" id="image-slideshow-box">
+                <!-- Slaid gambar dipaparkan dinamik melalui JS -->
             </div>
         </div>
 
@@ -711,6 +589,9 @@
                 malam: { mo: "-", ma: "-", sn: "-" }
             },
             youtubePlaylist: "https://www.youtube.com/watch?v=AaBF4oKLQZs&list=PLMDNGtzvgdI0",
+            driveImages: [
+                "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https://www.facebook.com/share/199ijRaqcr/"
+            ],
             quran: [
                 { arabic: "وَإِذَا مَرِضْتُ فَهُوَ يَشْفِينِ", bm: "Dan apabila aku sakit, Dialah yang menyembuhkan aku. (Asy-Syu'ara: 80)" },
                 { arabic: "فَإِنَّ مَعَ الْعُسْرِ يُسْرًا", bm: "Maka sesungguhnya bersama kesulitan itu ada kemudahan. (Al-Insyirah: 5)" }
@@ -834,19 +715,6 @@
             return timeStr;
         }
 
-        function renderStackedStaffNames(elementId, nameString) {
-            const container = document.getElementById(elementId);
-            if (!container) return;
-            
-            if (!nameString || nameString.trim() === "" || nameString.trim() === "-") {
-                container.innerHTML = `<div class="staff-name">-</div>`;
-                return;
-            }
-
-            let namesArray = nameString.split(/[,;\n]+/).map(n => n.trim()).filter(n => n.length > 0);
-            container.innerHTML = namesArray.map(name => `<div class="staff-name">${name}</div>`).join('');
-        }
-
         function updateClockAndLogic() {
             const now = new Date();
             
@@ -864,28 +732,16 @@
                 currentDateString = todayStr;
             }
 
-            const h = now.getHours();
-            let shift = 'malam'; 
-            if (h >= 8 && h < 15) shift = 'pagi'; 
-            else if (h >= 15 && h < 22) shift = 'petang'; 
-            
-            document.getElementById('current-shift-badge').textContent = shift.toUpperCase();
-            if(dashboardData.staff && dashboardData.staff[shift]) {
-                renderStackedStaffNames('staff-mo', dashboardData.staff[shift].mo);
-                renderStackedStaffNames('staff-ma', dashboardData.staff[shift].ma);
-                renderStackedStaffNames('staff-sn', dashboardData.staff[shift].sn);
-            }
-
             checkAudioLogic(now);
         }
 
-        /* LOGIK PEMUTARAN AUDIO QURAN (20 MIN), AZAN & ZIKIR (DENGAN PERLINDUNGAN KEUTAMAAN QURAN) */
+        /* LOGIK PEMUTARAN AUDIO QURAN (20 MIN), AZAN & ZIKIR */
         function checkAudioLogic(now) {
             if(!isAudioUnlocked) return;
 
             const nowInSeconds = (now.getHours() * 3600) + (now.getMinutes() * 60) + now.getSeconds();
             let inPrayerPhase = false;
-            let isNearPrayerTime = false; // Pengesan jika hampir dengan waktu solat (kurang 25 minit)
+            let isNearPrayerTime = false;
 
             if (Object.keys(prayerTimesData).length > 0) {
                 for (let solat in prayerTimesData) {
@@ -897,7 +753,6 @@
                     const diffSeconds = prayerInSeconds - nowInSeconds;
                     const prayerDiv = document.getElementById(`prayer-${solat}`);
 
-                    // Sekat Zikir jika solat berada dalam lingkungan 25 minit (1500 saat)
                     if (diffSeconds <= 1500 && diffSeconds > 0) {
                         isNearPrayerTime = true;
                     }
@@ -916,7 +771,6 @@
                     if (diffSeconds <= 1200 && diffSeconds > 0) {
                         inPrayerPhase = true;
                         
-                        // Potong Zikir serta-merta jika sedang berbunyi
                         if (!audioZikir.paused) {
                             audioZikir.pause();
                             audioZikir.currentTime = 0;
@@ -982,7 +836,7 @@
                 }
             }
 
-            // 3. ZIKIR SETIAP GENAP JAM (HANYA DIMAINKAN JIKA TIDAK HAMPIR WAKTU SOLAT / BACAAN QURAN)
+            // 3. ZIKIR SETIAP GENAP JAM
             const currentHour = now.getHours();
             const minutes = now.getMinutes();
             const seconds = now.getSeconds();
@@ -992,7 +846,6 @@
                 playRandomZikir();
             }
 
-            // RESET SEMULA YOUTUBE (UNMUTE) SETELAH TAMAT MP3
             if (!inPrayerPhase && isSpecialAudioPlaying && audioAzan.paused && audioQuran.paused && audioZikir.paused) {
                 resetToVideoNormal();
             }
@@ -1089,8 +942,10 @@
 
         let quranRotatorItems = [];
         let announceRotatorItems = [];
+        let driveImageItems = [];
         let quranIndex = 0;
         let announceIndex = 0;
+        let imageIndex = 0;
 
         function updateDashboardUI() {
             if(dashboardData.patients) {
@@ -1101,6 +956,21 @@
                 document.getElementById('val-obs').textContent = dashboardData.patients.observation || 0;
             }
 
+            // 1. SLIDESHOW GAMBAR DRIVE / POSTER (SEBELAH KANAN VIDEO - 40%)
+            const imageBox = document.getElementById('image-slideshow-box');
+            imageBox.innerHTML = '';
+            driveImageItems = dashboardData.driveImages || [
+                "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https://www.facebook.com/share/199ijRaqcr/"
+            ];
+
+            driveImageItems.forEach((imgUrl, idx) => {
+                let div = document.createElement('div');
+                div.className = `image-slide ${idx === 0 ? 'active' : ''}`;
+                div.innerHTML = `<img src="${imgUrl}" alt="Makluman Visual HKN">`;
+                imageBox.appendChild(div);
+            });
+
+            // 2. KOTAK QURAN SAHAJA (DI BAWAH SEBELAH KIRI)
             const quranPanel = document.getElementById('quran-rotator-panel');
             quranPanel.innerHTML = '';
             quranRotatorItems = [];
@@ -1125,6 +995,7 @@
                 quranPanel.appendChild(div);
             });
 
+            // 3. KOTAK PENGUMUMAN SAHAJA (DI BAWAH SEBELAH KANAN)
             const announcePanel = document.getElementById('announce-rotator-panel');
             announcePanel.innerHTML = '';
             announceRotatorItems = [];
@@ -1151,6 +1022,15 @@
         }
 
         function rotateContent() {
+            // Rotasi Slideshow Gambar Drive
+            const imageSlides = document.querySelectorAll('.image-slide');
+            if(imageSlides.length > 0) {
+                imageSlides.forEach(s => s.classList.remove('active'));
+                imageIndex = (imageIndex + 1) % imageSlides.length;
+                imageSlides[imageIndex].classList.add('active');
+            }
+
+            // Rotasi Slaid Quran
             const quranSlides = document.querySelectorAll('.quran-slide');
             if(quranSlides.length > 0) {
                 quranSlides.forEach(s => s.classList.remove('active'));
@@ -1158,6 +1038,7 @@
                 quranSlides[quranIndex].classList.add('active');
             }
 
+            // Rotasi Slaid Pengumuman
             const announceSlides = document.querySelectorAll('.announce-slide');
             if(announceSlides.length > 0) {
                 announceSlides.forEach(s => s.classList.remove('active'));
@@ -1170,7 +1051,7 @@
             await fetchDashboardData();
             
             setInterval(updateClockAndLogic, 1000);   
-            setInterval(rotateContent, 10000); 
+            setInterval(rotateContent, 10000); // Bertukar setiap 10 saat
             setInterval(fetchDashboardData, 5000); 
             setInterval(fetchDashboardData, 3600000); 
         };
