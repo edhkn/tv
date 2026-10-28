@@ -522,7 +522,6 @@
 
     <main>
         <div class="top-section">
-            <!-- SEBELAH KIRI: PLAYER YOUTUBE (60%) -->
             <div class="video-box">
                 <iframe id="youtube-player" 
                         allow="autoplay; encrypted-media; picture-in-picture" 
@@ -532,9 +531,7 @@
                 <div class="audio-indicator" id="audio-indicator">🔊 Sedang Memainkan Bacaan Al-Quran...</div>
             </div>
 
-            <!-- SEBELAH KANAN: SLIDESHOW GAMBAR GOOGLE DRIVE (40%) -->
             <div class="image-slideshow-box" id="image-slideshow-box">
-                <!-- Slaid gambar dipaparkan dinamik melalui JS -->
             </div>
         </div>
 
@@ -635,11 +632,20 @@
             }).catch(() => {});
         }
 
+        /* MEMATIKAN BROWSER CACHE SEPENUHNYA APABILA MEMANGGIL BACKEND GAS */
         async function fetchDashboardData() {
             try {
                 if(GAS_WEB_APP_URL && !GAS_WEB_APP_URL.includes("INSERT_YOUR")) {
-                    const res = await fetch(`${GAS_WEB_APP_URL}?t=${new Date().getTime()}`, {
-                        cache: 'no-store'
+                    const nocacheUrl = `${GAS_WEB_APP_URL}?t=${new Date().getTime()}&_nocache=${Math.random()}`;
+                    const res = await fetch(nocacheUrl, {
+                        method: 'GET',
+                        cache: 'reload',
+                        mode: 'cors',
+                        headers: {
+                            'Cache-Control': 'no-cache, no-store, must-revalidate',
+                            'Pragma': 'no-cache',
+                            'Expires': '0'
+                        }
                     });
                     const data = await res.json();
                     
@@ -733,7 +739,7 @@
             checkAudioLogic(now);
         }
 
-        /* LOGIK PEMUTARAN AUDIO QURAN (20 MIN), AZAN & ZIKIR */
+        /* LOGIK PEMUTARAN AUDIO QURAN, AZAN & ZIKIR */
         function checkAudioLogic(now) {
             if(!isAudioUnlocked) return;
 
@@ -765,7 +771,7 @@
                         currentAzanSolatName = "";
                     }
 
-                    // 1. FASA QURAN: 20 MINIT SEBELUM SOLAT (1200 Saat)
+                    // 1. FASA QURAN: 20 MINIT SEBELUM SOLAT
                     if (diffSeconds <= 1200 && diffSeconds > 0) {
                         inPrayerPhase = true;
                         
@@ -972,7 +978,7 @@
                 imageBox.appendChild(div);
             });
 
-            // 2. KOTAK QURAN SAHAJA (DI BAWAH SEBELAH KIRI)
+            // 2. KOTAK QURAN SAHAJA
             const quranPanel = document.getElementById('quran-rotator-panel');
             quranPanel.innerHTML = '';
             quranRotatorItems = [];
@@ -997,7 +1003,7 @@
                 quranPanel.appendChild(div);
             });
 
-            // 3. KOTAK PENGUMUMAN SAHAJA (DI BAWAH SEBELAH KANAN)
+            // 3. KOTAK PENGUMUMAN SAHAJA
             const announcePanel = document.getElementById('announce-rotator-panel');
             announcePanel.innerHTML = '';
             announceRotatorItems = [];
@@ -1024,7 +1030,6 @@
         }
 
         function rotateContent() {
-            // Rotasi Slideshow Gambar Drive
             const imageSlides = document.querySelectorAll('.image-slide');
             if(imageSlides.length > 0) {
                 imageSlides.forEach(s => s.classList.remove('active'));
@@ -1032,7 +1037,6 @@
                 imageSlides[imageIndex].classList.add('active');
             }
 
-            // Rotasi Slaid Quran
             const quranSlides = document.querySelectorAll('.quran-slide');
             if(quranSlides.length > 0) {
                 quranSlides.forEach(s => s.classList.remove('active'));
@@ -1040,7 +1044,6 @@
                 quranSlides[quranIndex].classList.add('active');
             }
 
-            // Rotasi Slaid Pengumuman
             const announceSlides = document.querySelectorAll('.announce-slide');
             if(announceSlides.length > 0) {
                 announceSlides.forEach(s => s.classList.remove('active'));
@@ -1050,11 +1053,12 @@
         }
 
         window.onload = async () => {
+            // Memaksa panggilan terus secara segar semasa pertama kali dibuka
             await fetchDashboardData();
             
             setInterval(updateClockAndLogic, 1000);   
-            setInterval(rotateContent, 30000); // Pertukaran slaid setiap 30 saat
-            setInterval(fetchDashboardData, 5000); 
+            setInterval(rotateContent, 30000); 
+            setInterval(fetchDashboardData, 5000); // Mengemaskini data pesakit/waktu solat secara dinamik setiap 5 saat
             setInterval(fetchDashboardData, 3600000); 
         };
     </script>
