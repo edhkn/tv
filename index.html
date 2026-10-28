@@ -632,20 +632,14 @@
             }).catch(() => {});
         }
 
-        /* MEMATIKAN BROWSER CACHE SEPENUHNYA APABILA MEMANGGIL BACKEND GAS */
+        /* MEMANGGIL GOOGLE APPS SCRIPT DENGAN MOD MESRA-GOOGLE DAN REDIRECT: FOLLOW */
         async function fetchDashboardData() {
             try {
                 if(GAS_WEB_APP_URL && !GAS_WEB_APP_URL.includes("INSERT_YOUR")) {
-                    const nocacheUrl = `${GAS_WEB_APP_URL}?t=${new Date().getTime()}&_nocache=${Math.random()}`;
-                    const res = await fetch(nocacheUrl, {
+                    const fetchUrl = `${GAS_WEB_APP_URL}?t=${new Date().getTime()}&_nocache=${Math.random()}`;
+                    const res = await fetch(fetchUrl, {
                         method: 'GET',
-                        cache: 'reload',
-                        mode: 'cors',
-                        headers: {
-                            'Cache-Control': 'no-cache, no-store, must-revalidate',
-                            'Pragma': 'no-cache',
-                            'Expires': '0'
-                        }
+                        redirect: 'follow'
                     });
                     const data = await res.json();
                     
@@ -1053,12 +1047,11 @@
         }
 
         window.onload = async () => {
-            // Memaksa panggilan terus secara segar semasa pertama kali dibuka
             await fetchDashboardData();
             
             setInterval(updateClockAndLogic, 1000);   
             setInterval(rotateContent, 30000); 
-            setInterval(fetchDashboardData, 5000); // Mengemaskini data pesakit/waktu solat secara dinamik setiap 5 saat
+            setInterval(fetchDashboardData, 5000); 
             setInterval(fetchDashboardData, 3600000); 
         };
     </script>
