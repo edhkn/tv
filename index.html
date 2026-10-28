@@ -632,7 +632,7 @@
             }).catch(() => {});
         }
 
-        /* MEMANGGIL GOOGLE APPS SCRIPT DENGAN MOD MESRA-GOOGLE DAN REDIRECT: FOLLOW */
+        /* MEMANGGIL GOOGLE APPS SCRIPT SECARA STRICT NO-CACHE DENGAN OVERRIDE PARAMETER */
         async function fetchDashboardData() {
             try {
                 if(GAS_WEB_APP_URL && !GAS_WEB_APP_URL.includes("INSERT_YOUR")) {
@@ -954,7 +954,7 @@
                 document.getElementById('val-obs').textContent = dashboardData.patients.observation || 0;
             }
 
-            // 1. SLIDESHOW GAMBAR DRIVE / POSTER (SEBELAH KANAN VIDEO - 40%)
+            // 1. SLIDESHOW GAMBAR DRIVE / POSTER
             const imageBox = document.getElementById('image-slideshow-box');
             imageBox.innerHTML = '';
             driveImageItems = dashboardData.driveImages || [
@@ -1052,7 +1052,7 @@
             setInterval(updateClockAndLogic, 1000);   
             setInterval(rotateContent, 30000); 
             setInterval(fetchDashboardData, 5000); 
-            setInterval(fetchDashboardData, 3600000); 
+            setInterval(fetchDashboardData, 3600000); // REFRESH PAKSA WAKTU SOLAT DARI BACKEND SETIAP SEJAM
         };
     </script>
 </body>
