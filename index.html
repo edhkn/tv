@@ -738,6 +738,7 @@
         
         let isSpecialAudioPlaying = false; 
         let isCallerVoicePlaying = false;
+        let isCallerAlertActive = false;
         let isAudioUnlocked = false;
         let lastImagesString = "";
         let lastQuranString = "";
@@ -755,6 +756,20 @@
         let callerRepeatTimeout = null;
         let audioCtx = null;
         let preferredMalayFemaleVoice = null;
+
+        /* MUTE & HENTIKAN SUARA ZIKIR SEMASA PANGGILAN PESAKIT DIBUAT */
+        function muteZikirForCaller() {
+            if (!audioZikir) return;
+            audioZikir.muted = true;
+            if (!audioZikir.paused) {
+                audioZikir.pause();
+                audioZikir.currentTime = 0;
+            }
+            if (audioQuran.paused && audioAzan.paused) {
+                isSpecialAudioPlaying = false;
+                audioIndicator.style.display = "none";
+            }
+        }
 
         /* PEMILIHAN SUARA PEREMPUAN MELAYU (MS-MY) */
         function isMaleVoiceName(nameLower) {
@@ -793,7 +808,6 @@
                 return lang === 'ms-my' || lang.startsWith('ms');
             });
 
-            // 1. Keutamaan tertinggi: Suara perempuan Melayu (ms-MY)
             preferredMalayFemaleVoice =
                 malayVoices.find(v => isFemaleVoiceName(v.name.toLowerCase()) && !isMaleVoiceName(v.name.toLowerCase())) ||
                 malayVoices.find(v => !isMaleVoiceName(v.name.toLowerCase())) ||
@@ -884,7 +898,6 @@
         function formatRoomToBahasaBaku(roomStr) {
             let text = String(roomStr || '').trim().toUpperCase();
 
-            // Terjemah istilah bilik bahasa Inggeris kepada Bahasa Melayu Baku
             const roomDictionary = {
                 'ASTHMA BAY': 'Ruang Rawatan Asma',
                 'OBSERVATION': 'Bilik Pemerhatian',
@@ -907,7 +920,6 @@
                 text = text.replace(/^TRIAGE\s+/, 'Bilik Saringan ');
             }
 
-            // Tukar sebarang angka pada nama bilik kepada perkataan baku (cth: BILIK 1 -> Bilik Satu)
             text = text.toLowerCase().replace(/\d+/g, (match) => {
                 const n = parseInt(match, 10);
                 return numberToBakuPhrase(n);
@@ -918,6 +930,9 @@
 
         function finishCallerVoice() {
             isCallerVoicePlaying = false;
+            if (!isCallerAlertActive && audioZikir) {
+                audioZikir.muted = false;
+            }
             if (!isSpecialAudioPlaying) {
                 muteYouTubePlayer(false);
             }
@@ -943,6 +958,7 @@
             if (!isAudioUnlocked) return;
 
             isCallerVoicePlaying = true;
+            muteZikirForCaller();
             muteYouTubePlayer(true);
 
             let chimeDurationMs = 0;
@@ -1021,9 +1037,9 @@
                     const utterance = new SpeechSynthesisUtterance(announcementBaku);
                     utterance.voice = preferredMalayFemaleVoice;
                     utterance.lang = 'ms-MY';
-                    utterance.volume = 1.0; // Kelantangan maksimum
-                    utterance.rate = 0.86;  // Sebutan baku jelas, teratur, tidak tergesa-gesa
-                    utterance.pitch = 1.15; // Nada suara perempuan yang lembut dan jelas
+                    utterance.volume = 1.0;
+                    utterance.rate = 0.86;
+                    utterance.pitch = 1.15;
 
                     utterance.onend = finishCallerVoice;
                     utterance.onerror = () => {
@@ -1050,6 +1066,9 @@
             numEl.textContent = paddedNum;
             roomEl.textContent = upperRoom;
 
+            isCallerAlertActive = true;
+            muteZikirForCaller();
+
             box.classList.add('caller-active');
             overlay.classList.add('active');
 
@@ -1067,6 +1086,10 @@
 
             // Kembali ke gambar-gambar semula selepas 30 saat (30000 ms)
             callerHideTimeout = setTimeout(() => {
+                isCallerAlertActive = false;
+                if (!isCallerVoicePlaying && audioZikir) {
+                    audioZikir.muted = false;
+                }
                 box.classList.remove('caller-active');
                 overlay.classList.remove('active');
                 callerHideTimeout = null;
@@ -1261,6 +1284,11 @@
         function checkAudioLogic(now) {
             if(!isAudioUnlocked) return;
 
+            // Pastikan suara zikir sentiasa mute & berhenti jika panggilan pesakit sedang berlangsung
+            if (isCallerAlertActive || isCallerVoicePlaying) {
+                muteZikirForCaller();
+            }
+
             const nowInSeconds = (now.getHours() * 3600) + (now.getMinutes() * 60) + now.getSeconds();
             let inPrayerPhase = false;
             let isNearPrayerTime = false;
@@ -1356,12 +1384,12 @@
                 }
             }
 
-            // 3. ZIKIR SETIAP GENAP JAM
+            // 3. ZIKIR SETIAP GENAP JAM (DISEKAD JIKA PANGGILAN PESAKIT SEDANG AKTIF)
             const currentHour = now.getHours();
             const minutes = now.getMinutes();
             const seconds = now.getSeconds();
 
-            if (!inPrayerPhase && !isNearPrayerTime && minutes === 0 && seconds <= 3 && lastZikirHourPlayed !== currentHour) {
+            if (!inPrayerPhase && !isNearPrayerTime && !isCallerAlertActive && !isCallerVoicePlaying && minutes === 0 && seconds <= 3 && lastZikirHourPlayed !== currentHour) {
                 lastZikirHourPlayed = currentHour;
                 playRandomZikir();
             }
@@ -1372,6 +1400,8 @@
         }
 
         function playRandomZikir() {
+            if (isCallerAlertActive || isCallerVoicePlaying) return;
+
             const randomIndex = Math.floor(Math.random() * 5) + 1;
             const zikirFile = `zikir_${randomIndex}.mp3`;
 
@@ -1381,6 +1411,7 @@
             audioIndicator.style.display = "block";
             audioIndicator.textContent = `🔊 Bacaan Zikir Ringkas`;
 
+            audioZikir.muted = false;
             audioZikir.src = zikirFile;
             audioZikir.volume = 1.0;
             audioZikir.load();
@@ -1398,7 +1429,7 @@
             currentQuranSolatName = "";
             currentAzanSolatName = "";
             audioIndicator.style.display = "none";
-            if (!isCallerVoicePlaying) {
+            if (!isCallerVoicePlaying && !isCallerAlertActive) {
                 muteYouTubePlayer(false);
             }
         }
