@@ -80,6 +80,183 @@
             animation: pulse 1.5s infinite;
         }
 
+        /* PAPARAN PANGGILAN PESAKIT MENYELURUH SKRIN PENUH (30 SAAT) */
+        #fullscreen-caller-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 900;
+            display: none;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            text-align: center;
+            padding: 3vh 4vw;
+            background: radial-gradient(circle at center, #7f1d1d 0%, #140303 100%);
+            border: 12px solid #ffffff;
+            animation: fullscreen-alarm-blink 0.6s infinite alternate;
+        }
+
+        #fullscreen-caller-overlay.active {
+            display: flex;
+        }
+
+        .fs-caller-header {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .fs-caller-badge {
+            background: var(--bright-red);
+            color: #ffffff;
+            padding: 10px 36px;
+            border-radius: 50px;
+            font-size: clamp(1.3rem, 2.2vw, 2.6rem);
+            font-weight: 900;
+            letter-spacing: 2px;
+            border: 3px solid #ffffff;
+            box-shadow: 0 0 25px var(--bright-red-glow);
+            text-transform: uppercase;
+        }
+
+        .fs-caller-hospital {
+            font-size: clamp(0.95rem, 1.3vw, 1.5rem);
+            font-weight: 800;
+            color: #fca5a5;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .fs-caller-center {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            width: 100%;
+        }
+
+        .fs-caller-label {
+            font-size: clamp(1.3rem, 2vw, 2.4rem);
+            font-weight: 900;
+            color: #ffffff;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            text-shadow: 2px 2px 6px #000000;
+        }
+
+        .fs-caller-number {
+            font-size: clamp(7rem, 17vw, 18rem);
+            font-weight: 900;
+            color: var(--islamic-gold);
+            line-height: 1;
+            letter-spacing: 14px;
+            margin: 1vh 0 2vh 0;
+            animation: caller-number-blink 0.6s infinite alternate;
+        }
+
+        .fs-caller-divider {
+            width: 70%;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, var(--hospital-blue), #ffffff, var(--hospital-blue), transparent);
+            margin: 1vh 0 2.5vh 0;
+        }
+
+        .fs-caller-room {
+            font-size: clamp(2.8rem, 6vw, 6.8rem);
+            font-weight: 900;
+            color: #ffffff;
+            background: rgba(2, 132, 199, 0.45);
+            border: 5px solid var(--hospital-blue);
+            padding: 14px 56px;
+            border-radius: 24px;
+            margin-top: 1.2vh;
+            letter-spacing: 3px;
+            animation: caller-room-blink 0.6s infinite alternate;
+        }
+
+        .fs-caller-footer {
+            width: 100%;
+            max-width: 700px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .fs-timer-bar-bg {
+            width: 100%;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .fs-timer-bar-fill {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--bright-red), var(--islamic-gold));
+            transform-origin: left;
+        }
+
+        .fs-timer-bar-fill.running {
+            animation: countdown-shrink 30s linear forwards;
+        }
+
+        @keyframes countdown-shrink {
+            from { transform: scaleX(1); }
+            to { transform: scaleX(0); }
+        }
+
+        @keyframes fullscreen-alarm-blink {
+            0% {
+                border-color: #ffffff;
+                background: radial-gradient(circle at center, #991b1b 0%, #180505 100%);
+                box-shadow: inset 0 0 60px rgba(255, 0, 51, 0.85);
+            }
+            100% {
+                border-color: var(--islamic-gold);
+                background: radial-gradient(circle at center, #450a0a 0%, #090202 100%);
+                box-shadow: inset 0 0 80px rgba(251, 191, 36, 0.65);
+            }
+        }
+
+        @keyframes caller-number-blink {
+            0% {
+                opacity: 1;
+                color: var(--islamic-gold);
+                text-shadow: 0 0 30px rgba(251, 191, 36, 0.95), 0 0 60px rgba(255, 0, 51, 0.8), 4px 4px 10px #000;
+                transform: scale(1);
+            }
+            100% {
+                opacity: 0.45;
+                color: #ffffff;
+                text-shadow: 0 0 40px #ffffff, 4px 4px 10px #000;
+                transform: scale(1.04);
+            }
+        }
+
+        @keyframes caller-room-blink {
+            0% {
+                background-color: rgba(255, 0, 51, 0.9);
+                border-color: #ffffff;
+                color: #ffffff;
+                box-shadow: 0 0 35px var(--bright-red-glow);
+                transform: scale(1);
+            }
+            100% {
+                background-color: rgba(2, 132, 199, 0.5);
+                border-color: var(--islamic-gold);
+                color: var(--islamic-gold);
+                box-shadow: 0 0 20px rgba(56, 189, 248, 0.7);
+                transform: scale(1.03);
+            }
+        }
+
         header {
             height: 11vh;
             background-color: var(--bg-card-dark);
@@ -233,7 +410,7 @@
             z-index: 20;
         }
 
-        /* KOTAK GAMBAR & PAPARAN PANGGILAN PESAKIT */
+        /* KOTAK GAMBAR GOOGLE DRIVE (40%) */
         .image-slideshow-box {
             width: 40%;
             background-color: var(--bg-card-dark);
@@ -245,12 +422,6 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            transition: all 0.2s ease;
-        }
-
-        .image-slideshow-box.caller-active {
-            animation: caller-box-blink 0.65s infinite alternate;
-            border-width: 5px;
         }
 
         #slides-container {
@@ -280,115 +451,6 @@
             object-fit: contain;
             border-radius: 8px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.6);
-        }
-
-        /* LAPISAN OVERLAY PANGGILAN PESAKIT (30 SAAT) */
-        .caller-alert-overlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at center, #7f1d1d 0%, #180505 100%);
-            z-index: 30;
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 16px;
-        }
-
-        .caller-alert-overlay.active {
-            display: flex;
-        }
-
-        .caller-badge {
-            background: var(--bright-red);
-            color: #ffffff;
-            padding: 6px 20px;
-            border-radius: 50px;
-            font-size: clamp(0.9rem, 1.3vw, 1.5rem);
-            font-weight: 900;
-            letter-spacing: 1px;
-            border: 2px solid #ffffff;
-            margin-bottom: 10px;
-            box-shadow: 0 0 15px var(--bright-red-glow);
-        }
-
-        .caller-label {
-            font-size: clamp(0.85rem, 1.15vw, 1.3rem);
-            font-weight: 800;
-            color: #fca5a5;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-        }
-
-        .caller-number {
-            font-size: clamp(3.5rem, 6.2vw, 7.2rem);
-            font-weight: 900;
-            color: var(--islamic-gold);
-            line-height: 1.05;
-            letter-spacing: 4px;
-            margin: 4px 0 10px 0;
-            animation: caller-text-blink 0.65s infinite alternate;
-        }
-
-        .caller-divider {
-            width: 75%;
-            height: 3px;
-            background: linear-gradient(90deg, transparent, var(--hospital-blue), transparent);
-            margin: 6px 0 12px 0;
-        }
-
-        .caller-room {
-            font-size: clamp(1.8rem, 3vw, 3.6rem);
-            font-weight: 900;
-            color: #ffffff;
-            background: rgba(2, 132, 199, 0.35);
-            border: 3px solid var(--hospital-blue);
-            padding: 8px 28px;
-            border-radius: 14px;
-            margin-top: 6px;
-            animation: caller-room-blink 0.65s infinite alternate;
-        }
-
-        @keyframes caller-box-blink {
-            0% {
-                border-color: #ffffff;
-                box-shadow: 0 0 25px var(--bright-red), inset 0 0 20px rgba(255, 0, 51, 0.6);
-            }
-            100% {
-                border-color: var(--islamic-gold);
-                box-shadow: 0 0 35px var(--islamic-gold), inset 0 0 25px rgba(251, 191, 36, 0.5);
-            }
-        }
-
-        @keyframes caller-text-blink {
-            0% {
-                opacity: 1;
-                color: var(--islamic-gold);
-                text-shadow: 0 0 15px rgba(251, 191, 36, 0.9), 3px 3px 6px #000;
-                transform: scale(1);
-            }
-            100% {
-                opacity: 0.45;
-                color: #ffffff;
-                text-shadow: 0 0 25px #ffffff, 3px 3px 6px #000;
-                transform: scale(1.04);
-            }
-        }
-
-        @keyframes caller-room-blink {
-            0% {
-                background-color: rgba(255, 0, 51, 0.85);
-                border-color: #ffffff;
-                color: #ffffff;
-                box-shadow: 0 0 20px var(--bright-red-glow);
-            }
-            100% {
-                background-color: rgba(2, 132, 199, 0.45);
-                border-color: var(--islamic-gold);
-                color: var(--islamic-gold);
-                box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
-            }
         }
 
         .bottom-section {
@@ -610,8 +672,30 @@
 
     <div id="audio-overlay">
         <h2 style="font-size: 2.2rem;">PAPAN PEMUKA TV UNIT KECEMASAN</h2>
-        <p style="font-size: 1.3rem; margin-top: 10px;">Sila tekan butang di bawah sekali sahaja untuk membolehkan audio/azan & suara panggilan berbunyi automatik.</p>
+        <p style="font-size: 1.3rem; margin-top: 10px;">Sila tekan butang di bawah sekali sahaja untuk membolehkan audio/azan, alarm loceng & suara panggilan berbunyi automatik.</p>
         <button onclick="enableAudioSystem()">🚨 MULA DISPLAY & AKTIFKAN AUDIO</button>
+    </div>
+
+    <!-- PAPARAN MENYELURUH SKRIN PENUH UNTUK PANGGILAN PESAKIT (30 SAAT) -->
+    <div id="fullscreen-caller-overlay">
+        <div class="fs-caller-header">
+            <div class="fs-caller-badge">🔔 PANGGILAN PESAKIT 🔔</div>
+            <div class="fs-caller-hospital">UNIT KECEMASAN DAN TRAUMA • HOSPITAL KUALA NERANG</div>
+        </div>
+
+        <div class="fs-caller-center">
+            <div class="fs-caller-label">NOMBOR GILIRAN</div>
+            <div class="fs-caller-number" id="caller-display-number">0000</div>
+            <div class="fs-caller-divider"></div>
+            <div class="fs-caller-label">SILA MASUK KE</div>
+            <div class="fs-caller-room" id="caller-display-room">BILIK 1</div>
+        </div>
+
+        <div class="fs-caller-footer">
+            <div class="fs-timer-bar-bg">
+                <div class="fs-timer-bar-fill" id="fs-timer-bar-fill"></div>
+            </div>
+        </div>
     </div>
 
     <audio id="audio-quran" preload="auto" crossorigin="anonymous"></audio>
@@ -653,18 +737,9 @@
                 <div class="audio-indicator" id="audio-indicator">🔊 Sedang Memainkan Bacaan Al-Quran...</div>
             </div>
 
-            <!-- KOTAK GAMBAR + PAPARAN PANGGILAN PESAKIT -->
+            <!-- KOTAK GAMBAR GOOGLE DRIVE -->
             <div class="image-slideshow-box" id="image-slideshow-box">
                 <div id="slides-container"></div>
-
-                <div class="caller-alert-overlay" id="caller-alert-overlay">
-                    <div class="caller-badge">🔔 PANGGILAN PESAKIT 🔔</div>
-                    <div class="caller-label">NOMBOR GILIRAN</div>
-                    <div class="caller-number" id="caller-display-number">0000</div>
-                    <div class="caller-divider"></div>
-                    <div class="caller-label">SILA MASUK KE</div>
-                    <div class="caller-room" id="caller-display-room">BILIK 1</div>
-                </div>
             </div>
         </div>
 
@@ -747,7 +822,7 @@
         let lastZikirHourPlayed = -1; 
         let currentDateString = ""; 
 
-        // PEMBOLEHUBAH PANGGILAN PESAKIT (3 KALI PANGGILAN)
+        // PEMBOLEHUBAH PANGGILAN PESAKIT (3 KALI PANGGILAN + PAPARAN MENYELURUH 30 SAAT)
         let lastProcessedCallId = null;
         let isFirstFetch = true;
         let activeCallSessionId = 0;
@@ -757,7 +832,6 @@
         let audioCtx = null;
         let preferredMaleVoice = null;
 
-        // Simpan rujukan global supaya Chromium tidak memadam utterance sebelum selesai disebut
         window._activeCallerUtterance = null;
 
         /* MUTE & HENTIKAN SUARA ZIKIR SEMASA PANGGILAN PESAKIT DIBUAT */
@@ -774,7 +848,7 @@
             }
         }
 
-        /* PEMILIHAN SUARA LELAKI MELAYU (MS-MY) / BAKU TERBAIK YANG TERSEDIA PADA PERANTI */
+        /* PEMILIHAN SUARA LELAKI MELAYU (MS-MY) / BAKU TERBAIK */
         function isFemaleVoiceName(nameLower) {
             return (
                 nameLower.includes('yasmin') ||
@@ -822,15 +896,12 @@
             const maleAny = voices.filter(v => isMaleVoiceName(v.name.toLowerCase()) && !isFemaleVoiceName(v.name.toLowerCase()));
 
             preferredMaleVoice =
-                // 1. Suara lelaki Bahasa Melayu (ms-MY, contoh: Microsoft Osman)
                 msVoices.find(v => isMaleVoiceName(v.name.toLowerCase()) && !isFemaleVoiceName(v.name.toLowerCase())) ||
                 msVoices.find(v => !isFemaleVoiceName(v.name.toLowerCase())) ||
                 msVoices[0] ||
-                // 2. Suara lelaki Bahasa Indonesia (id-ID, contoh: Microsoft Ardi)
                 idVoices.find(v => isMaleVoiceName(v.name.toLowerCase()) && !isFemaleVoiceName(v.name.toLowerCase())) ||
                 idVoices.find(v => !isFemaleVoiceName(v.name.toLowerCase())) ||
                 idVoices[0] ||
-                // 3. Mana-mana suara lelaki sistem
                 maleAny[0] ||
                 voices[0];
 
@@ -859,7 +930,6 @@
                 if (audioCtx.state === 'suspended') audioCtx.resume();
             } catch (e) {}
 
-            // Aktifkan enjin suara TTS secara sah melalui klik pengguna
             if ('speechSynthesis' in window) {
                 try {
                     window.speechSynthesis.cancel();
@@ -976,36 +1046,38 @@
             }
         }
 
-        /* BUNYI LOCENG HOSPITAL KUAT */
-        function playHospitalChime() {
+        /* ALARM PANGGILAN LOCENG HOSPITAL LANTANG (4-NADA LOCENG + HARMONIK) */
+        function playHospitalBellAlarm() {
             if (!isAudioUnlocked) return 150;
             try {
                 if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 if (audioCtx.state === 'suspended') audioCtx.resume();
 
                 const compressor = audioCtx.createDynamicsCompressor();
-                compressor.threshold.setValueAtTime(-12, audioCtx.currentTime);
-                compressor.knee.setValueAtTime(10, audioCtx.currentTime);
-                compressor.ratio.setValueAtTime(12, audioCtx.currentTime);
-                compressor.attack.setValueAtTime(0.003, audioCtx.currentTime);
+                compressor.threshold.setValueAtTime(-10, audioCtx.currentTime);
+                compressor.knee.setValueAtTime(8, audioCtx.currentTime);
+                compressor.ratio.setValueAtTime(14, audioCtx.currentTime);
+                compressor.attack.setValueAtTime(0.002, audioCtx.currentTime);
                 compressor.release.setValueAtTime(0.25, audioCtx.currentTime);
                 compressor.connect(audioCtx.destination);
 
                 const now = audioCtx.currentTime;
-                const notes = [659.25, 523.25, 783.99]; // E5 -> C5 -> G5
-                const step = 0.36;
+                // Melodi loceng panggilan rasmi hospital: G5 -> E5 -> C5 -> G5
+                const bellNotes = [783.99, 659.25, 523.25, 783.99];
+                const step = 0.34;
 
-                notes.forEach((freq, idx) => {
+                bellNotes.forEach((freq, idx) => {
                     const startTime = now + idx * step;
-                    const duration = 0.85;
+                    const duration = (idx === bellNotes.length - 1) ? 1.25 : 0.85;
 
+                    // Nada asas loceng (Triangle nyaring)
                     const osc1 = audioCtx.createOscillator();
                     const gain1 = audioCtx.createGain();
                     osc1.type = 'triangle';
                     osc1.frequency.setValueAtTime(freq, startTime);
 
                     gain1.gain.setValueAtTime(0.001, startTime);
-                    gain1.gain.exponentialRampToValueAtTime(1.0, startTime + 0.03);
+                    gain1.gain.exponentialRampToValueAtTime(1.0, startTime + 0.02);
                     gain1.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
 
                     osc1.connect(gain1);
@@ -1013,28 +1085,44 @@
                     osc1.start(startTime);
                     osc1.stop(startTime + duration + 0.05);
 
+                    // Harmonik oktaf atas loceng logam
                     const osc2 = audioCtx.createOscillator();
                     const gain2 = audioCtx.createGain();
                     osc2.type = 'sine';
                     osc2.frequency.setValueAtTime(freq * 2, startTime);
 
                     gain2.gain.setValueAtTime(0.001, startTime);
-                    gain2.gain.exponentialRampToValueAtTime(0.55, startTime + 0.02);
+                    gain2.gain.exponentialRampToValueAtTime(0.6, startTime + 0.015);
                     gain2.gain.exponentialRampToValueAtTime(0.001, startTime + duration * 0.75);
 
                     osc2.connect(gain2);
                     gain2.connect(compressor);
                     osc2.start(startTime);
                     osc2.stop(startTime + duration);
+
+                    // Dentingan loceng tinggi (partial ke-3)
+                    const osc3 = audioCtx.createOscillator();
+                    const gain3 = audioCtx.createGain();
+                    osc3.type = 'sine';
+                    osc3.frequency.setValueAtTime(freq * 3, startTime);
+
+                    gain3.gain.setValueAtTime(0.001, startTime);
+                    gain3.gain.exponentialRampToValueAtTime(0.28, startTime + 0.01);
+                    gain3.gain.exponentialRampToValueAtTime(0.001, startTime + 0.35);
+
+                    osc3.connect(gain3);
+                    gain3.connect(compressor);
+                    osc3.start(startTime);
+                    osc3.stop(startTime + 0.4);
                 });
 
-                return (notes.length * step * 1000) + 120;
+                return (bellNotes.length * step * 1000) + 250;
             } catch (e) {
                 return 150;
             }
         }
 
-        /* JALANKAN PANGGILAN SUARA LELAKI MELAYU SEBANYAK 3 KALI SECARA BERTURUT-TURUT */
+        /* JALANKAN ALARM LOCENG + PANGGILAN SUARA LELAKI MELAYU SEBANYAK 3 KALI */
         function runCallerAnnouncementCycle(numberStr, roomStr, sessionId, attemptNumber) {
             if (!isAudioUnlocked || sessionId !== activeCallSessionId) return;
 
@@ -1042,7 +1130,7 @@
             muteZikirForCaller();
             muteYouTubePlayer(true);
 
-            const chimeDurationMs = playHospitalChime();
+            const bellDurationMs = playHospitalBellAlarm();
 
             setTimeout(() => {
                 if (sessionId !== activeCallSessionId) return;
@@ -1064,13 +1152,11 @@
                     if (sessionId !== activeCallSessionId) return;
 
                     if (attemptNumber < 3) {
-                        // Jeda 2 saat sebelum panggilan ke-2 dan ke-3
                         callerNextRepeatTimeout = setTimeout(() => {
                             callerNextRepeatTimeout = null;
                             runCallerAnnouncementCycle(numberStr, roomStr, sessionId, attemptNumber + 1);
-                        }, 2000);
+                        }, 1600);
                     } else {
-                        // Selesai 3 kali panggilan
                         finishAllCallerVoices();
                     }
                 };
@@ -1091,9 +1177,8 @@
                                 utterance.lang = 'ms-MY';
                             }
 
-                            utterance.volume = 1.0; // Kelantangan maksimum
-                            utterance.rate = 0.86;  // Sebutan Bahasa Baku lelaki jelas & tegas
-                            // Kekalkan nada lelaki (0.95) atau rendahkan nada jika sistem hanya ada suara perempuan (0.78)
+                            utterance.volume = 1.0;
+                            utterance.rate = 0.88;
                             const isFemaleSelected = selectedVoice && isFemaleVoiceName(selectedVoice.name.toLowerCase());
                             utterance.pitch = isFemaleSelected ? 0.78 : 0.95;
 
@@ -1106,7 +1191,7 @@
                             window.speechSynthesis.resume();
 
                             if (voiceSafetyTimeout) clearTimeout(voiceSafetyTimeout);
-                            voiceSafetyTimeout = setTimeout(handleSingleAttemptDone, 9500);
+                            voiceSafetyTimeout = setTimeout(handleSingleAttemptDone, 9000);
                         } catch (err) {
                             handleSingleAttemptDone();
                         }
@@ -1114,15 +1199,15 @@
                 } catch (e) {
                     handleSingleAttemptDone();
                 }
-            }, chimeDurationMs);
+            }, bellDurationMs);
         }
 
-        /* PAPARKAN NOMBOR GILIRAN & BILIK BERKELIP SELAMA 30 SAAT + SUARA 3 KALI */
-        function showCallerOnImageBox(numberStr, roomStr) {
-            const box = document.getElementById('image-slideshow-box');
-            const overlay = document.getElementById('caller-alert-overlay');
+        /* PAPARKAN NOMBOR GILIRAN DI ATAS PAPARAN SECARA MENYELURUH SELAMA 30 SAAT */
+        function showFullscreenCallerAlert(numberStr, roomStr) {
+            const overlay = document.getElementById('fullscreen-caller-overlay');
             const numEl = document.getElementById('caller-display-number');
             const roomEl = document.getElementById('caller-display-room');
+            const timerBar = document.getElementById('fs-timer-bar-fill');
 
             const paddedNum = String(numberStr).padStart(4, '0');
             const upperRoom = String(roomStr).toUpperCase();
@@ -1136,24 +1221,28 @@
             isCallerAlertActive = true;
             muteZikirForCaller();
 
-            box.classList.add('caller-active');
+            // Tetapkan semula animasi bar masa 30 saat
+            timerBar.classList.remove('running');
+            void timerBar.offsetWidth;
+            timerBar.classList.add('running');
+
             overlay.classList.add('active');
 
             if (callerHideTimeout) clearTimeout(callerHideTimeout);
             if (callerNextRepeatTimeout) clearTimeout(callerNextRepeatTimeout);
             if (voiceSafetyTimeout) clearTimeout(voiceSafetyTimeout);
 
-            // Mulakan pusingan panggilan suara lelaki Melayu sebanyak 3 kali
+            // Mulakan alarm loceng + panggilan suara lelaki Melayu sebanyak 3 kali
             runCallerAnnouncementCycle(paddedNum, upperRoom, currentSession, 1);
 
-            // Kembali ke gambar-gambar semula selepas 30 saat (30000 ms)
+            // Tutup paparan menyeluruh dan kembali ke papan pemuka utama selepas 30 saat (30000 ms)
             callerHideTimeout = setTimeout(() => {
                 isCallerAlertActive = false;
                 if (!isCallerVoicePlaying && audioZikir) {
                     audioZikir.muted = false;
                 }
-                box.classList.remove('caller-active');
                 overlay.classList.remove('active');
+                timerBar.classList.remove('running');
                 callerHideTimeout = null;
             }, 30000);
         }
@@ -1244,11 +1333,11 @@
                             if (isFirstFetch) {
                                 lastProcessedCallId = incomingId;
                                 if (Date.now() - Number(incomingId) < 30000) {
-                                    showCallerOnImageBox(data.latestCall.number, data.latestCall.room);
+                                    showFullscreenCallerAlert(data.latestCall.number, data.latestCall.room);
                                 }
                             } else if (incomingId !== lastProcessedCallId) {
                                 lastProcessedCallId = incomingId;
-                                showCallerOnImageBox(data.latestCall.number, data.latestCall.room);
+                                showFullscreenCallerAlert(data.latestCall.number, data.latestCall.room);
                             }
                         }
                         isFirstFetch = false;
@@ -1607,7 +1696,7 @@
                 const quranPanel = document.getElementById('quran-rotator-panel');
                 quranPanel.innerHTML = '';
                 quranRotatorItems = quranList.map(q => ({
-                    html: `<h2>📖 AYAT SUCI AL-QURAN</h2><div class="quran-arabic">${q.arabic}</div><div class="quran-bm">${q.bm}</div>`
+                    html: `<h2>AL-QURAN & HADITH</h2><div class="quran-arabic">${q.arabic}</div><div class="quran-bm">${q.bm}</div>`
                 }));
 
                 if (quranRotatorItems.length > 0) {
