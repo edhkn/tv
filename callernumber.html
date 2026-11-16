@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Panggilan Pesakit - Kecemasan HKN</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #180505;
+            --bg-panel: #2b0909;
+            --card-bg: #3f0d0d;
+            --bright-red: #ff0033;
+            --bright-red-glow: rgba(255, 0, 51, 0.5);
+            --gold: #fbbf24;
+            --blue: #38bdf8;
+            --green: #10b981;
+            --text-main: #ffffff;
+            --text-muted: #fca5a5;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at top, #5c0f1b 0%, var(--bg-dark) 100%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        header {
+            width: 100%;
+            max-width: 960px;
+            background: var(--bg-panel);
+            border: 2px solid var(--bright-red);
+            border-radius: 14px;
+            padding: 15px 22px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        header h1 {
+            font-size: 1.35rem;
+            font-weight: 900;
+            letter-spacing: 0.5px;
+        }
+
+        header p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .status-badge {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid var(--green);
+            color: var(--green);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 800;
+        }
+
+        .main-container {
+            width: 100%;
+            max-width: 960px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background: var(--bg-panel);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .section-label {
+            font-size: 0.85rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--blue);
+        }
+
+        /* PAPARAN 4 DIGIT */
+        .digit-display-wrapper {
+            background: #0f0303;
+            border: 3px solid var(--gold);
+            border-radius: 14px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.8);
+        }
+
+        .digit-boxes {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 6px;
+        }
+
+        .digit-slot {
+            width: 64px;
+            height: 78px;
+            background: #240707;
+            border: 2px solid rgba(251, 191, 36, 0.4);
+            border-radius: 10px;
+            font-size: 2.8rem;
+            font-weight: 900;
+            color: var(--gold);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
+        }
+
+        .digit-slot.filled {
+            border-color: var(--gold);
+            background: #380b0b;
+        }
+
+        /* KEYPAD 0-9 */
+        .keypad-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .key-btn {
+            background: var(--card-bg);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 16px 0;
+            font-size: 1.6rem;
+            font-weight: 900;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            user-select: none;
+        }
+
+        .key-btn:hover {
+            background: #591414;
+            border-color: var(--gold);
+        }
+
+        .key-btn:active {
+            transform: scale(0.96);
+        }
+
+        .key-btn.btn-clear {
+            background: #7f1d1d;
+            font-size: 1rem;
+            color: #fca5a5;
+        }
+
+        .key-btn.btn-back {
+            background: #451a03;
+            font-size: 1.1rem;
+            color: var(--gold);
+        }
+
+        /* PILIHAN NOMBOR BILIK */
+        .room-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .room-btn {
+            background: #1a0606;
+            color: #ffffff;
+            border: 2px solid rgba(56, 189, 248, 0.35);
+            border-radius: 12px;
+            padding: 14px 10px;
+            font-size: 1.05rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .room-btn:hover {
+            border-color: var(--blue);
+            background: #0c2436;
+        }
+
+        .room-btn.selected {
+            background: var(--blue);
+            color: #091522;
+            border-color: #ffffff;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.6);
+        }
+
+        .custom-room-input {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 10px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            background: #140404;
+            color: #ffffff;
+            font-size: 1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .custom-room-input:focus {
+            outline: none;
+            border-color: var(--blue);
+        }
+
+        /* PREVIEW & BUTANG PANGGIL */
+        .preview-box {
+            background: rgba(0, 0, 0, 0.45);
+            border: 1px dashed rgba(255, 255, 255, 0.25);
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .preview-box span {
+            color: var(--gold);
+            font-weight: 900;
+            font-size: 1.2rem;
+        }
+
+        .btn-call-main {
+            width: 100%;
+            background: linear-gradient(135deg, #ff0033 0%, #b91c1c 100%);
+            color: #ffffff;
+            border: 2px solid #ffffff;
+            border-radius: 14px;
+            padding: 18px;
+            font-size: 1.35rem;
+            font-weight: 900;
+            cursor: pointer;
+            box-shadow: 0 0 20px var(--bright-red-glow);
+            transition: all 0.2s ease;
+        }
+
+        .btn-call-main:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 30px var(--bright-red-glow);
+        }
+
+        .btn-call-main:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .action-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .btn-secondary {
+            background: #1e293b;
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            border-radius: 10px;
+            padding: 12px;
+            font-size: 0.9rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-secondary:hover {
+            background: #334155;
+            border-color: var(--gold);
+        }
+
+        .toast-msg {
+            text-align: center;
+            font-size: 0.95rem;
+            font-weight: 800;
+            min-height: 24px;
+            color: var(--green);
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            max-height: 140px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            background: rgba(255, 255, 255, 0.06);
+            padding: 8px 12px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+            font-weight: 700;
+        }
+
+        .history-item button {
+            background: var(--gold);
+            color: #000;
+            border: none;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-weight: 800;
+            font-size: 0.75rem;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div>
+            <h1>🚨 PANGGILAN PESAKIT (ED HKN)</h1>
+            <p>Unit Kecemasan dan Trauma, Hospital Kuala Nerang</p>
+        </div>
+        <div class="status-badge" id="connection-status">● SEDIA</div>
+    </header>
+
+    <div class="main-container">
+        <!-- PANEL KIRI: KEYPAD 4 DIGIT -->
+        <div class="panel">
+            <div class="section-label">1. Masukkan Nombor Giliran (4 Digit)</div>
+            
+            <div class="digit-display-wrapper">
+                <div style="font-size: 0.75rem; color: #fca5a5; font-weight: 700;">NOMBOR GILIRAN</div>
+                <div class="digit-boxes" id="digit-boxes">
+                    <div class="digit-slot">-</div>
+                    <div class="digit-slot">-</div>
+                    <div class="digit-slot">-</div>
+                    <div class="digit-slot">-</div>
+                </div>
+            </div>
+
+            <div class="keypad-grid">
+                <button class="key-btn" onclick="pressDigit('1')">1</button>
+                <button class="key-btn" onclick="pressDigit('2')">2</button>
+                <button class="key-btn" onclick="pressDigit('3')">3</button>
+                <button class="key-btn" onclick="pressDigit('4')">4</button>
+                <button class="key-btn" onclick="pressDigit('5')">5</button>
+                <button class="key-btn" onclick="pressDigit('6')">6</button>
+                <button class="key-btn" onclick="pressDigit('7')">7</button>
+                <button class="key-btn" onclick="pressDigit('8')">8</button>
+                <button class="key-btn" onclick="pressDigit('9')">9</button>
+                <button class="key-btn btn-clear" onclick="clearDigits()">PADAM</button>
+                <button class="key-btn" onclick="pressDigit('0')">0</button>
+                <button class="key-btn btn-back" onclick="backspaceDigit()">⌫</button>
+            </div>
+        </div>
+
+        <!-- PANEL KANAN: PILIHAN BILIK & HANTAR -->
+        <div class="panel">
+            <div class="section-label">2. Pilih Nombor Bilik</div>
+            
+            <div class="room-grid" id="room-grid">
+                <button class="room-btn selected" onclick="selectRoom(this, 'BILIK 1')">BILIK 1</button>
+                <button class="room-btn" onclick="selectRoom(this, 'BILIK 2')">BILIK 2</button>
+                <button class="room-btn" onclick="selectRoom(this, 'BILIK 3')">BILIK 3</button>
+                <button class="room-btn" onclick="selectRoom(this, 'BILIK 4')">BILIK 4</button>
+                <button class="room-btn" onclick="selectRoom(this, 'BILIK 5')">BILIK 5</button>
+                <button class="room-btn" onclick="selectRoom(this, 'BILIK 6')">BILIK 6</button>
+                <button class="room-btn" onclick="selectRoom(this, 'BILIK RAWATAN')">BILIK RAWATAN</button>
+                <button class="room-btn" onclick="selectRoom(this, 'ASTHMA BAY')">ASTHMA BAY</button>
+            </div>
+
+            <input type="text" id="custom-room" class="custom-room-input" placeholder="Atau taip nama bilik lain (cth: TRIAGE 1)..." oninput="handleCustomRoom(this.value)">
+
+            <div class="preview-box">
+                Paparan TV: <span id="preview-number">0000</span> ➔ <span id="preview-room">BILIK 1</span>
+            </div>
+
+            <button class="btn-call-main" id="btn-call" onclick="triggerPatientCall()">📢 PANGGIL PESAKIT</button>
+
+            <div class="action-row">
+                <button class="btn-secondary" onclick="recallLastPatient()">🔁 PANGGIL SEMULA</button>
+                <button class="btn-secondary" onclick="callNextNumber()">⏭️ NOMBOR +1</button>
+            </div>
+
+            <div class="toast-msg" id="toast-msg"></div>
+
+            <div class="section-label" style="margin-top: 4px;">Rekod Panggilan Terkini</div>
+            <div class="history-list" id="history-list">
+                <div style="color: #9ca3af; font-size: 0.85rem; text-align: center;">Tiada panggilan dibuat lagi.</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyVPT9S6zwOQjUORDge2sl6hHnrn9rJmf3uftmd8_VDxwSvklRLywu26fBn7sQR0MW32w/exec";
+
+        let currentInput = "";
+        let selectedRoom = "BILIK 1";
+        let lastCalledNumber = "";
+        let lastCalledRoom = "BILIK 1";
+        let callHistory = [];
+
+        function renderDigits() {
+            const slots = document.querySelectorAll('.digit-slot');
+            const paddedPreview = currentInput.padStart(4, '0');
+            document.getElementById('preview-number').textContent = paddedPreview;
+
+            for (let i = 0; i < 4; i++) {
+                if (i < currentInput.length) {
+                    slots[i].textContent = currentInput[i];
+                    slots[i].classList.add('filled');
+                } else {
+                    slots[i].textContent = "-";
+                    slots[i].classList.remove('filled');
+                }
+            }
+        }
+
+        function pressDigit(digit) {
+            if (currentInput.length < 4) {
+                currentInput += digit;
+                renderDigits();
+            }
+        }
+
+        function backspaceDigit() {
+            if (currentInput.length > 0) {
+                currentInput = currentInput.slice(0, -1);
+                renderDigits();
+            }
+        }
+
+        function clearDigits() {
+            currentInput = "";
+            renderDigits();
+        }
+
+        function selectRoom(btnEl, roomName) {
+            document.querySelectorAll('.room-btn').forEach(b => b.classList.remove('selected'));
+            btnEl.classList.add('selected');
+            document.getElementById('custom-room').value = "";
+            selectedRoom = roomName;
+            document.getElementById('preview-room').textContent = selectedRoom;
+        }
+
+        function handleCustomRoom(val) {
+            const cleaned = val.trim().toUpperCase();
+            if (cleaned.length > 0) {
+                document.querySelectorAll('.room-btn').forEach(b => b.classList.remove('selected'));
+                selectedRoom = cleaned;
+            } else {
+                const firstBtn = document.querySelector('.room-btn');
+                firstBtn.classList.add('selected');
+                selectedRoom = "BILIK 1";
+            }
+            document.getElementById('preview-room').textContent = selectedRoom;
+        }
+
+        async function sendCallToTV(fourDigitNumber, roomName) {
+            const btnCall = document.getElementById('btn-call');
+            const toast = document.getElementById('toast-msg');
+            const statusBadge = document.getElementById('connection-status');
+
+            btnCall.disabled = true;
+            btnCall.textContent = "⏳ MENGHANTAR KE TV...";
+            statusBadge.textContent = "● MENGHANTAR...";
+            statusBadge.style.color = "#fbbf24";
+
+            try {
+                const url = `${GAS_WEB_APP_URL}?action=call&number=${encodeURIComponent(fourDigitNumber)}&room=${encodeURIComponent(roomName)}&_t=${Date.now()}`;
+                const res = await fetch(url, {
+                    method: 'GET',
+                    redirect: 'follow'
+                });
+                const json = await res.json();
+
+                if (json && json.status === 'success') {
+                    lastCalledNumber = fourDigitNumber;
+                    lastCalledRoom = roomName;
+                    addHistoryItem(fourDigitNumber, roomName);
+
+                    toast.style.color = "#10b981";
+                    toast.textContent = `✅ Nombor ${fourDigitNumber} (${roomName}) dipaparkan di TV!`;
+                    statusBadge.textContent = "● BERJAYA";
+                    statusBadge.style.color = "#10b981";
+
+                    // Kosongkan input selepas berjaya panggil
+                    currentInput = "";
+                    renderDigits();
+                } else {
+                    throw new Error("Respon tidak sah");
+                }
+            } catch (err) {
+                toast.style.color = "#ff0033";
+                toast.textContent = "❌ Gagal menghubungi TV. Sila semak internet / Apps Script.";
+                statusBadge.textContent = "● RALAT";
+                statusBadge.style.color = "#ff0033";
+            } finally {
+                btnCall.disabled = false;
+                btnCall.textContent = "📢 PANGGIL PESAKIT";
+            }
+        }
+
+        function triggerPatientCall() {
+            const toast = document.getElementById('toast-msg');
+            if (currentInput.length === 0) {
+                toast.style.color = "#fbbf24";
+                toast.textContent = "⚠️ Sila masukkan nombor giliran pesakit terlebih dahulu.";
+                return;
+            }
+            const formattedNumber = currentInput.padStart(4, '0');
+            sendCallToTV(formattedNumber, selectedRoom);
+        }
+
+        function recallLastPatient() {
+            const toast = document.getElementById('toast-msg');
+            if (!lastCalledNumber) {
+                toast.style.color = "#fbbf24";
+                toast.textContent = "⚠️ Tiada nombor sebelumnya untuk dipanggil semula.";
+                return;
+            }
+            sendCallToTV(lastCalledNumber, lastCalledRoom);
+        }
+
+        function callNextNumber() {
+            const baseNum = currentInput.length > 0 ? parseInt(currentInput, 10) : (lastCalledNumber ? parseInt(lastCalledNumber, 10) : 0);
+            const nextNum = (baseNum + 1) > 9999 ? 1 : (baseNum + 1);
+            const formattedNext = String(nextNum).padStart(4, '0');
+            sendCallToTV(formattedNext, selectedRoom);
+        }
+
+        function addHistoryItem(number, room) {
+            const timeStr = new Date().toLocaleTimeString('ms-MY', { hour: '2-digit', minute: '2-digit' });
+            callHistory.unshift({ number, room, time: timeStr });
+            if (callHistory.length > 6) callHistory.pop();
+
+            const listEl = document.getElementById('history-list');
+            listEl.innerHTML = callHistory.map(item => `
+                <div class="history-item">
+                    <span><strong style="color:#fbbf24;">${item.number}</strong> ➔ ${item.room} <small style="color:#9ca3af;">(${item.time})</small></span>
+                    <button onclick="sendCallToTV('${item.number}', '${item.room}')">Panggil</button>
+                </div>
+            `).join('');
+        }
+
+        // Sokongan papan kekunci fizikal (Keyboard)
+        document.addEventListener('keydown', (e) => {
+            if (document.activeElement.id === 'custom-room') return;
+            if (e.key >= '0' && e.key <= '9') {
+                pressDigit(e.key);
+            } else if (e.key === 'Backspace') {
+                backspaceDigit();
+            } else if (e.key === 'Escape') {
+                clearDigits();
+            } else if (e.key === 'Enter') {
+                triggerPatientCall();
+            }
+        });
+    </script>
+</body>
+</html>
