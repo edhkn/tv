@@ -617,7 +617,6 @@
     <audio id="audio-quran" preload="auto" crossorigin="anonymous"></audio>
     <audio id="audio-azan" preload="auto" crossorigin="anonymous"></audio>
     <audio id="audio-zikir" preload="auto" crossorigin="anonymous"></audio>
-    <audio id="audio-caller-tts" preload="auto" referrerpolicy="no-referrer"></audio>
 
     <header>
         <div class="header-title-container">
@@ -732,7 +731,6 @@
         const audioQuran = document.getElementById('audio-quran');
         const audioAzan = document.getElementById('audio-azan');
         const audioZikir = document.getElementById('audio-zikir');
-        const audioCallerTts = document.getElementById('audio-caller-tts');
         const audioIndicator = document.getElementById('audio-indicator');
         const youtubePlayer = document.getElementById('youtube-player');
         
@@ -754,8 +752,12 @@
         let isFirstFetch = true;
         let callerHideTimeout = null;
         let callerRepeatTimeout = null;
+        let voiceSafetyTimeout = null;
         let audioCtx = null;
-        let preferredMalayFemaleVoice = null;
+        let preferredFemaleVoice = null;
+
+        // Simpan rujukan global supaya Chromium tidak memadam utterance sebelum selesai disebut
+        window._activeCallerUtterance = null;
 
         /* MUTE & HENTIKAN SUARA ZIKIR SEMASA PANGGILAN PESAKIT DIBUAT */
         function muteZikirForCaller() {
@@ -771,21 +773,26 @@
             }
         }
 
-        /* PEMILIHAN SUARA PEREMPUAN MELAYU (MS-MY) */
+        /* PEMILIHAN SUARA PEREMPUAN MELAYU / BAKU TERBAIK YANG TERSEDIA PADA PERANTI */
         function isMaleVoiceName(nameLower) {
             return (
                 nameLower.includes('osman') ||
                 nameLower.includes('male') ||
                 nameLower.includes('lelaki') ||
-                nameLower.includes('man') ||
                 nameLower.includes('ardi') ||
-                nameLower.includes('adi')
+                nameLower.includes('adi') ||
+                nameLower.includes('david') ||
+                nameLower.includes('mark') ||
+                nameLower.includes('george') ||
+                nameLower.includes('daniel') ||
+                nameLower.includes('james')
             );
         }
 
         function isFemaleVoiceName(nameLower) {
             return (
                 nameLower.includes('yasmin') ||
+                nameLower.includes('gadis') ||
                 nameLower.includes('female') ||
                 nameLower.includes('perempuan') ||
                 nameLower.includes('woman') ||
@@ -794,30 +801,40 @@
                 nameLower.includes('aisyah') ||
                 nameLower.includes('nadia') ||
                 nameLower.includes('nurul') ||
-                nameLower.includes('google bahasa melayu')
+                nameLower.includes('zira') ||
+                nameLower.includes('samantha') ||
+                nameLower.includes('google bahasa')
             );
         }
 
-        function loadMalayFemaleVoice() {
-            if (!('speechSynthesis' in window)) return;
+        function loadBestFemaleVoice() {
+            if (!('speechSynthesis' in window)) return null;
             const voices = window.speechSynthesis.getVoices();
-            if (!voices || voices.length === 0) return;
+            if (!voices || voices.length === 0) return null;
 
-            const malayVoices = voices.filter(v => {
-                const lang = v.lang.toLowerCase();
-                return lang === 'ms-my' || lang.startsWith('ms');
-            });
+            const msVoices = voices.filter(v => v.lang.toLowerCase().startsWith('ms'));
+            const idVoices = voices.filter(v => v.lang.toLowerCase().startsWith('id'));
+            const femaleAny = voices.filter(v => isFemaleVoiceName(v.name.toLowerCase()) && !isMaleVoiceName(v.name.toLowerCase()));
 
-            preferredMalayFemaleVoice =
-                malayVoices.find(v => isFemaleVoiceName(v.name.toLowerCase()) && !isMaleVoiceName(v.name.toLowerCase())) ||
-                malayVoices.find(v => !isMaleVoiceName(v.name.toLowerCase())) ||
-                malayVoices[0] ||
-                null;
+            preferredFemaleVoice =
+                // 1. Suara perempuan Bahasa Melayu (ms-MY)
+                msVoices.find(v => isFemaleVoiceName(v.name.toLowerCase()) && !isMaleVoiceName(v.name.toLowerCase())) ||
+                msVoices.find(v => !isMaleVoiceName(v.name.toLowerCase())) ||
+                msVoices[0] ||
+                // 2. Suara perempuan Bahasa Indonesia (id-ID) - sebutan baku hampir 100% sama
+                idVoices.find(v => isFemaleVoiceName(v.name.toLowerCase()) && !isMaleVoiceName(v.name.toLowerCase())) ||
+                idVoices.find(v => !isMaleVoiceName(v.name.toLowerCase())) ||
+                idVoices[0] ||
+                // 3. Mana-mana suara perempuan sistem (akan sebut ejaan fonetik Melayu dengan jelas)
+                femaleAny[0] ||
+                voices[0];
+
+            return preferredFemaleVoice;
         }
 
         if ('speechSynthesis' in window) {
-            loadMalayFemaleVoice();
-            window.speechSynthesis.onvoiceschanged = loadMalayFemaleVoice;
+            loadBestFemaleVoice();
+            window.speechSynthesis.onvoiceschanged = loadBestFemaleVoice;
         }
 
         function enableAudioSystem() {
@@ -827,23 +844,33 @@
             audioQuran.volume = 1.0;
             audioAzan.volume = 1.0;
             audioZikir.volume = 1.0;
-            audioCallerTts.volume = 1.0;
 
             playDummyAudio(audioQuran);
             playDummyAudio(audioAzan);
             playDummyAudio(audioZikir);
-            playDummyAudio(audioCallerTts);
 
             try {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 if (audioCtx.state === 'suspended') audioCtx.resume();
             } catch (e) {}
 
+            // Aktifkan enjin suara TTS secara sah melalui klik pengguna
             if ('speechSynthesis' in window) {
                 try {
-                    loadMalayFemaleVoice();
-                    const unlockUtterance = new SpeechSynthesisUtterance("");
-                    window.speechSynthesis.speak(unlockUtterance);
+                    window.speechSynthesis.cancel();
+                    const selectedVoice = loadBestFemaleVoice();
+                    const primeUtterance = new SpeechSynthesisUtterance("Sistem sedia.");
+                    if (selectedVoice) {
+                        primeUtterance.voice = selectedVoice;
+                        primeUtterance.lang = selectedVoice.lang;
+                    } else {
+                        primeUtterance.lang = 'ms-MY';
+                    }
+                    primeUtterance.volume = 0.2;
+                    primeUtterance.rate = 1.0;
+                    window._activeCallerUtterance = primeUtterance;
+                    window.speechSynthesis.speak(primeUtterance);
+                    window.speechSynthesis.resume();
                 } catch (e) {}
             }
 
@@ -930,6 +957,11 @@
 
         function finishCallerVoice() {
             isCallerVoicePlaying = false;
+            window._activeCallerUtterance = null;
+            if (voiceSafetyTimeout) {
+                clearTimeout(voiceSafetyTimeout);
+                voiceSafetyTimeout = null;
+            }
             if (!isCallerAlertActive && audioZikir) {
                 audioZikir.muted = false;
             }
@@ -938,16 +970,51 @@
             }
         }
 
-        /* SANDARAN SUARA PEREMPUAN MELAYU JIKA BROWSER TIADA ENJIN SUARA MS-MY */
-        function playFallbackMalayFemaleAudio(sentenceText) {
+        /* SEBUTAN SUARA PEREMPUAN MELAYU (BAHASA BAKU) YANG STABIL PADA CHROME / EDGE / ANDROID TV */
+        function speakMalayFemaleBaku(announcementText) {
+            if (!('speechSynthesis' in window)) {
+                finishCallerVoice();
+                return;
+            }
+
             try {
-                const encoded = encodeURIComponent(sentenceText);
-                audioCallerTts.src = `https://translate.google.com/translate_tts?ie=UTF-8&tl=ms&client=tw-ob&q=${encoded}`;
-                audioCallerTts.volume = 1.0;
-                audioCallerTts.playbackRate = 0.95;
-                audioCallerTts.onended = finishCallerVoice;
-                audioCallerTts.onerror = finishCallerVoice;
-                audioCallerTts.play().catch(finishCallerVoice);
+                // Hentikan ucapan lama dan beri jeda 80ms supaya Chromium tidak membatalkan ucapan baharu
+                window.speechSynthesis.cancel();
+
+                setTimeout(() => {
+                    try {
+                        const selectedVoice = loadBestFemaleVoice();
+                        const utterance = new SpeechSynthesisUtterance(announcementText);
+
+                        if (selectedVoice) {
+                            utterance.voice = selectedVoice;
+                            utterance.lang = selectedVoice.lang;
+                        } else {
+                            utterance.lang = 'ms-MY';
+                        }
+
+                        utterance.volume = 1.0; // Kelantangan maksimum
+                        utterance.rate = 0.85;  // Kadar pertuturan Bahasa Baku jelas & teratur
+                        // Jika suara lelaki terpaksa digunakan oleh sistem, naikkan pitch sedikit ke nada perempuan
+                        const isMaleSelected = selectedVoice && isMaleVoiceName(selectedVoice.name.toLowerCase());
+                        utterance.pitch = isMaleSelected ? 1.35 : 1.12;
+
+                        utterance.onend = finishCallerVoice;
+                        utterance.onerror = finishCallerVoice;
+
+                        // Simpan rujukan global supaya tidak dipadam Garbage Collector
+                        window._activeCallerUtterance = utterance;
+
+                        window.speechSynthesis.speak(utterance);
+                        window.speechSynthesis.resume();
+
+                        // Pemasa keselamatan jika pelayar gagal menghantar isyarat onend
+                        if (voiceSafetyTimeout) clearTimeout(voiceSafetyTimeout);
+                        voiceSafetyTimeout = setTimeout(finishCallerVoice, 10000);
+                    } catch (err) {
+                        finishCallerVoice();
+                    }
+                }, 80);
             } catch (e) {
                 finishCallerVoice();
             }
@@ -1013,43 +1080,17 @@
                     osc2.stop(startTime + duration);
                 });
 
-                chimeDurationMs = (notes.length * step * 1000) + 150;
+                chimeDurationMs = (notes.length * step * 1000) + 120;
             } catch (e) {
-                console.warn("Loceng tidak dapat dimainkan:", e);
-                chimeDurationMs = 200;
+                chimeDurationMs = 150;
             }
 
-            // 2. PANGGILAN SUARA PEREMPUAN MELAYU (BAHASA BAKU)
+            // 2. PANGGILAN SUARA PEREMPUAN MELAYU (BAHASA BAKU) SELEPAS LOCENG
             setTimeout(() => {
                 const spokenDigitsBaku = formatDigitsToBakuWords(numberStr);
                 const spokenRoomBaku = formatRoomToBahasaBaku(roomStr);
                 const announcementBaku = `Perhatian. Nombor giliran, ${spokenDigitsBaku}. Sila masuk ke, ${spokenRoomBaku}. Terima kasih.`;
-
-                if ('speechSynthesis' in window) {
-                    window.speechSynthesis.cancel();
-                    loadMalayFemaleVoice();
-
-                    if (!preferredMalayFemaleVoice) {
-                        playFallbackMalayFemaleAudio(announcementBaku);
-                        return;
-                    }
-
-                    const utterance = new SpeechSynthesisUtterance(announcementBaku);
-                    utterance.voice = preferredMalayFemaleVoice;
-                    utterance.lang = 'ms-MY';
-                    utterance.volume = 1.0;
-                    utterance.rate = 0.86;
-                    utterance.pitch = 1.15;
-
-                    utterance.onend = finishCallerVoice;
-                    utterance.onerror = () => {
-                        playFallbackMalayFemaleAudio(announcementBaku);
-                    };
-
-                    window.speechSynthesis.speak(utterance);
-                } else {
-                    playFallbackMalayFemaleAudio(announcementBaku);
-                }
+                speakMalayFemaleBaku(announcementBaku);
             }, chimeDurationMs);
         }
 
@@ -1284,7 +1325,6 @@
         function checkAudioLogic(now) {
             if(!isAudioUnlocked) return;
 
-            // Pastikan suara zikir sentiasa mute & berhenti jika panggilan pesakit sedang berlangsung
             if (isCallerAlertActive || isCallerVoicePlaying) {
                 muteZikirForCaller();
             }
