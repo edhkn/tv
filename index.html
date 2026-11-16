@@ -817,15 +817,12 @@
             const femaleAny = voices.filter(v => isFemaleVoiceName(v.name.toLowerCase()) && !isMaleVoiceName(v.name.toLowerCase()));
 
             preferredFemaleVoice =
-                // 1. Suara perempuan Bahasa Melayu (ms-MY)
                 msVoices.find(v => isFemaleVoiceName(v.name.toLowerCase()) && !isMaleVoiceName(v.name.toLowerCase())) ||
                 msVoices.find(v => !isMaleVoiceName(v.name.toLowerCase())) ||
                 msVoices[0] ||
-                // 2. Suara perempuan Bahasa Indonesia (id-ID) - sebutan baku hampir 100% sama
                 idVoices.find(v => isFemaleVoiceName(v.name.toLowerCase()) && !isMaleVoiceName(v.name.toLowerCase())) ||
                 idVoices.find(v => !isMaleVoiceName(v.name.toLowerCase())) ||
                 idVoices[0] ||
-                // 3. Mana-mana suara perempuan sistem (akan sebut ejaan fonetik Melayu dengan jelas)
                 femaleAny[0] ||
                 voices[0];
 
@@ -885,10 +882,10 @@
             }).catch(() => {});
         }
 
-        /* TUKAR 4 DIGIT KEPADA SEBUTAN BAHASA MELAYU BAKU (0 = SIFAR) */
+        /* TUKAR 4 DIGIT KEPADA SEBUTAN BAHASA MELAYU BAKU (0 = KOSONG) */
         function formatDigitsToBakuWords(fourDigitStr) {
             const bakuDigitMap = {
-                '0': 'sifar',
+                '0': 'kosong',
                 '1': 'satu',
                 '2': 'dua',
                 '3': 'tiga',
@@ -908,7 +905,7 @@
         /* TUKAR NOMBOR KEPADA PERKATAAN BAHASA MELAYU BAKU */
         function numberToBakuPhrase(num) {
             const ones = ['', 'satu', 'dua', 'tiga', 'empat', 'lima', 'enam', 'tujuh', 'lapan', 'sembilan'];
-            if (num === 0) return 'sifar';
+            if (num === 0) return 'kosong';
             if (num < 10) return ones[num];
             if (num === 10) return 'sepuluh';
             if (num === 11) return 'sebelas';
@@ -978,7 +975,6 @@
             }
 
             try {
-                // Hentikan ucapan lama dan beri jeda 80ms supaya Chromium tidak membatalkan ucapan baharu
                 window.speechSynthesis.cancel();
 
                 setTimeout(() => {
@@ -993,22 +989,19 @@
                             utterance.lang = 'ms-MY';
                         }
 
-                        utterance.volume = 1.0; // Kelantangan maksimum
-                        utterance.rate = 0.85;  // Kadar pertuturan Bahasa Baku jelas & teratur
-                        // Jika suara lelaki terpaksa digunakan oleh sistem, naikkan pitch sedikit ke nada perempuan
+                        utterance.volume = 1.0;
+                        utterance.rate = 0.85;
                         const isMaleSelected = selectedVoice && isMaleVoiceName(selectedVoice.name.toLowerCase());
                         utterance.pitch = isMaleSelected ? 1.35 : 1.12;
 
                         utterance.onend = finishCallerVoice;
                         utterance.onerror = finishCallerVoice;
 
-                        // Simpan rujukan global supaya tidak dipadam Garbage Collector
                         window._activeCallerUtterance = utterance;
 
                         window.speechSynthesis.speak(utterance);
                         window.speechSynthesis.resume();
 
-                        // Pemasa keselamatan jika pelayar gagal menghantar isyarat onend
                         if (voiceSafetyTimeout) clearTimeout(voiceSafetyTimeout);
                         voiceSafetyTimeout = setTimeout(finishCallerVoice, 10000);
                     } catch (err) {
