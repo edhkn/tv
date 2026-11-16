@@ -594,6 +594,7 @@
         };
 
         let prayerTimesData = {};
+        let isDirectApiLoaded = false;
         const audioQuran = document.getElementById('audio-quran');
         const audioAzan = document.getElementById('audio-azan');
         const audioZikir = document.getElementById('audio-zikir');
@@ -602,7 +603,9 @@
         
         let isSpecialAudioPlaying = false; 
         let isAudioUnlocked = false;
-        let lastDataString = "";
+        let lastImagesString = "";
+        let lastQuranString = "";
+        let lastAnnounceString = "";
         let activePlaylistID = "";
         let currentQuranSolatName = "";
         let currentAzanSolatName = "";
@@ -632,7 +635,77 @@
             }).catch(() => {});
         }
 
-        /* MEMANGGIL GOOGLE APPS SCRIPT SECARA STRICT NO-CACHE DENGAN OVERRIDE PARAMETER */
+        function parseUnixOrStringToMYT24(val) {
+            if (!val) return "00:00";
+            let num = Number(val);
+            if (!isNaN(num) && num > 100000) {
+                if (String(Math.floor(num)).length === 10) num = num * 1000;
+                const d = new Date(num);
+                const parts = new Intl.DateTimeFormat('en-GB', {
+                    timeZone: 'Asia/Kuala_Lumpur',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: false
+                }).formatToParts(d);
+                const hh = parts.find(p => p.type === 'hour').value;
+                const mm = parts.find(p => p.type === 'minute').value;
+                return `${hh === '24' ? '00' : hh}:${mm}`;
+            }
+            const match = String(val).trim().match(/(\d{1,2}):(\d{2})/);
+            if (match) {
+                return `${match[1].padStart(2, '0')}:${match[2].padStart(2, '0')}`;
+            }
+            return "00:00";
+        }
+
+        /* PANGGILAN TERUS WAKTU SOLAT JAKIM (ZON KDH03 - PADANG TERAP / KUALA NERANG) */
+        async function fetchDirectWaktuSolatKDH03() {
+            const endpoints = [
+                `https://api.waktusolat.app/v2/solat/KDH03?_t=${Date.now()}`,
+                `https://mpt-server.vercel.app/v2/solat/KDH03?_t=${Date.now()}`
+            ];
+
+            const nowMYT = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kuala_Lumpur" }));
+            const todayDay = nowMYT.getDate();
+
+            for (let url of endpoints) {
+                try {
+                    const res = await fetch(url, { cache: 'no-store' });
+                    if (!res.ok) continue;
+                    const json = await res.json();
+
+                    let todayObj = null;
+                    if (json && Array.isArray(json.prayers) && json.prayers.length > 0) {
+                        todayObj = json.prayers.find(p => Number(p.day) === todayDay) || json.prayers[todayDay - 1];
+                    } else if (json && Array.isArray(json.prayerTime) && json.prayerTime.length > 0) {
+                        const yyyy = nowMYT.getFullYear();
+                        const mm = String(nowMYT.getMonth() + 1).padStart(2, '0');
+                        const dd = String(todayDay).padStart(2, '0');
+                        const todayStr = `${yyyy}-${mm}-${dd}`;
+                        todayObj = json.prayerTime.find(p => p.date === todayStr) || json.prayerTime[0];
+                    }
+
+                    if (todayObj && todayObj.fajr) {
+                        prayerTimesData = {
+                            Subuh: parseUnixOrStringToMYT24(todayObj.fajr),
+                            Syuruk: parseUnixOrStringToMYT24(todayObj.syuruk || todayObj.sunrise),
+                            Zohor: parseUnixOrStringToMYT24(todayObj.dhuhr),
+                            Asar: parseUnixOrStringToMYT24(todayObj.asr),
+                            Maghrib: parseUnixOrStringToMYT24(todayObj.maghrib),
+                            Isyak: parseUnixOrStringToMYT24(todayObj.isha)
+                        };
+                        isDirectApiLoaded = true;
+                        updatePrayerUI();
+                        return true;
+                    }
+                } catch (err) {
+                    console.warn("Mencuba sumber waktu solat seterusnya...", err);
+                }
+            }
+            return false;
+        }
+
+        /* MEMANGGIL GOOGLE APPS SCRIPT TANPA MENGGANGGU SLIDESHOW JIKA TIADA PERUBAHAN GAMBAR */
         async function fetchDashboardData() {
             try {
                 if(GAS_WEB_APP_URL && !GAS_WEB_APP_URL.includes("INSERT_YOUR")) {
@@ -644,23 +717,18 @@
                     const data = await res.json();
                     
                     if(data) {
-                        const newString = JSON.stringify(data);
-                        if (newString !== lastDataString) {
-                            lastDataString = newString;
-                            
-                            let isPlaylistChanged = data.youtubePlaylist && (data.youtubePlaylist !== dashboardData.youtubePlaylist);
-                            dashboardData = Object.assign(dashboardData, data);
-                            
-                            if (data.prayerTimes && data.prayerTimes.Subuh && data.prayerTimes.Subuh !== "00:00") {
-                                prayerTimesData = data.prayerTimes;
-                                updatePrayerUI();
-                            }
-                            
-                            updateDashboardUI();
-                            
-                            if (isPlaylistChanged || !activePlaylistID) {
-                                loadYouTubePlaylist();
-                            }
+                        let isPlaylistChanged = data.youtubePlaylist && (data.youtubePlaylist !== dashboardData.youtubePlaylist);
+                        dashboardData = Object.assign(dashboardData, data);
+                        
+                        if (!isDirectApiLoaded && data.prayerTimes && data.prayerTimes.Subuh && data.prayerTimes.Subuh !== "00:00") {
+                            prayerTimesData = data.prayerTimes;
+                            updatePrayerUI();
+                        }
+                        
+                        updateDashboardUI();
+                        
+                        if (isPlaylistChanged || !activePlaylistID) {
+                            loadYouTubePlaylist();
                         }
                     }
                 }
@@ -724,6 +792,8 @@
                 currentDateString = todayStr;
                 currentQuranSolatName = "";
                 currentAzanSolatName = "";
+                isDirectApiLoaded = false;
+                fetchDirectWaktuSolatKDH03();
                 window.location.reload(true);
                 return;
             } else if (currentDateString === "") {
@@ -938,6 +1008,16 @@
             return array;
         }
 
+        function buildDriveImageTag(imgUrl) {
+            const idMatch = String(imgUrl).match(/\/d\/([a-zA-Z0-9_-]+)/) || String(imgUrl).match(/[?&]id=([a-zA-Z0-9_-]+)/);
+            if (idMatch && idMatch[1]) {
+                const fileId = idMatch[1];
+                const fallbackUrl = `https://drive.google.com/thumbnail?id=${fileId}&sz=w1600`;
+                return `<img src="${imgUrl}" onerror="if(this.src!=='${fallbackUrl}'){this.src='${fallbackUrl}';}" alt="Makluman Visual HKN">`;
+            }
+            return `<img src="${imgUrl}" alt="Makluman Visual HKN">`;
+        }
+
         let quranRotatorItems = [];
         let announceRotatorItems = [];
         let driveImageItems = [];
@@ -954,92 +1034,108 @@
                 document.getElementById('val-obs').textContent = dashboardData.patients.observation || 0;
             }
 
-            // 1. SLIDESHOW GAMBAR DRIVE / POSTER
-            const imageBox = document.getElementById('image-slideshow-box');
-            imageBox.innerHTML = '';
-            driveImageItems = dashboardData.driveImages || [
-                "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https://www.facebook.com/share/199ijRaqcr/"
-            ];
+            // 1. SLIDESHOW GAMBAR DRIVE / POSTER (HANYA DIBINA SEMULA JIKA SENARAI GAMBAR BERUBAH)
+            let incomingImages = (Array.isArray(dashboardData.driveImages) && dashboardData.driveImages.length > 0)
+                ? dashboardData.driveImages
+                : ["https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https://www.facebook.com/share/199ijRaqcr/"];
 
-            if (driveImageItems.length === 0) {
-                driveImageItems.push("https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https://www.facebook.com/share/199ijRaqcr/");
+            const newImagesStr = JSON.stringify(incomingImages);
+            if (newImagesStr !== lastImagesString) {
+                lastImagesString = newImagesStr;
+                driveImageItems = incomingImages;
+                imageIndex = 0;
+
+                const imageBox = document.getElementById('image-slideshow-box');
+                imageBox.innerHTML = '';
+
+                driveImageItems.forEach((imgUrl, idx) => {
+                    let div = document.createElement('div');
+                    div.className = `image-slide ${idx === 0 ? 'active' : ''}`;
+                    div.innerHTML = buildDriveImageTag(imgUrl);
+                    imageBox.appendChild(div);
+                });
             }
-
-            driveImageItems.forEach((imgUrl, idx) => {
-                let div = document.createElement('div');
-                div.className = `image-slide ${idx === 0 ? 'active' : ''}`;
-                div.innerHTML = `<img src="${imgUrl}" alt="Makluman Visual HKN">`;
-                imageBox.appendChild(div);
-            });
 
             // 2. KOTAK QURAN SAHAJA
-            const quranPanel = document.getElementById('quran-rotator-panel');
-            quranPanel.innerHTML = '';
-            quranRotatorItems = [];
-
             let quranList = dashboardData.quran || [];
-            quranRotatorItems = quranList.map(q => ({
-                html: `<h2>📖 AYAT SUCI AL-QURAN</h2><div class="quran-arabic">${q.arabic}</div><div class="quran-bm">${q.bm}</div>`
-            }));
+            const newQuranStr = JSON.stringify(quranList);
+            if (newQuranStr !== lastQuranString) {
+                lastQuranString = newQuranStr;
+                quranIndex = 0;
 
-            if (quranRotatorItems.length > 0) {
-                quranRotatorItems = shuffleArray(quranRotatorItems);
-            } else {
-                quranRotatorItems.push({
-                    html: `<h2>📖 AYAT SUCI AL-QURAN</h2><div class="quran-arabic">وَإِذَا مَرِضْتُ فَهُوَ يَشْفِينِ</div><div class="quran-bm">Dan apabila aku sakit, Dialah yang menyembuhkan aku.</div>`
+                const quranPanel = document.getElementById('quran-rotator-panel');
+                quranPanel.innerHTML = '';
+                quranRotatorItems = quranList.map(q => ({
+                    html: `<h2>📖 AYAT SUCI AL-QURAN</h2><div class="quran-arabic">${q.arabic}</div><div class="quran-bm">${q.bm}</div>`
+                }));
+
+                if (quranRotatorItems.length > 0) {
+                    quranRotatorItems = shuffleArray(quranRotatorItems);
+                } else {
+                    quranRotatorItems.push({
+                        html: `<h2>📖 AYAT SUCI AL-QURAN</h2><div class="quran-arabic">وَإِذَا مَرِضْتُ فَهُوَ يَشْفِينِ</div><div class="quran-bm">Dan apabila aku sakit, Dialah yang menyembuhkan aku.</div>`
+                    });
+                }
+
+                quranRotatorItems.forEach((item, idx) => {
+                    let div = document.createElement('div');
+                    div.className = `rotator-slide quran-slide ${idx === 0 ? 'active' : ''}`;
+                    div.innerHTML = item.html;
+                    quranPanel.appendChild(div);
                 });
             }
-
-            quranRotatorItems.forEach((item, idx) => {
-                let div = document.createElement('div');
-                div.className = `rotator-slide quran-slide ${idx === 0 ? 'active' : ''}`;
-                div.innerHTML = item.html;
-                quranPanel.appendChild(div);
-            });
 
             // 3. KOTAK PENGUMUMAN SAHAJA
-            const announcePanel = document.getElementById('announce-rotator-panel');
-            announcePanel.innerHTML = '';
-            announceRotatorItems = [];
-
             let annList = dashboardData.announcements || [];
-            announceRotatorItems = annList.map(ann => ({
-                html: `<h2>📢 INFO / MAKLUMAN</h2><p>${ann}</p>`
-            }));
+            const newAnnounceStr = JSON.stringify(annList);
+            if (newAnnounceStr !== lastAnnounceString) {
+                lastAnnounceString = newAnnounceStr;
+                announceIndex = 0;
 
-            if (announceRotatorItems.length > 0) {
-                announceRotatorItems = shuffleArray(announceRotatorItems);
-            } else {
-                announceRotatorItems.push({
-                    html: `<h2>📢 INFO / MAKLUMAN</h2><p>Selamat Datang ke Unit Kecemasan & Trauma Hospital Kuala Nerang</p>`
+                const announcePanel = document.getElementById('announce-rotator-panel');
+                announcePanel.innerHTML = '';
+                announceRotatorItems = annList.map(ann => ({
+                    html: `<h2>📢 INFO / MAKLUMAN</h2><p>${ann}</p>`
+                }));
+
+                if (announceRotatorItems.length > 0) {
+                    announceRotatorItems = shuffleArray(announceRotatorItems);
+                } else {
+                    announceRotatorItems.push({
+                        html: `<h2>📢 INFO / MAKLUMAN</h2><p>Selamat Datang ke Unit Kecemasan & Trauma Hospital Kuala Nerang</p>`
+                    });
+                }
+
+                announceRotatorItems.forEach((item, idx) => {
+                    let div = document.createElement('div');
+                    div.className = `rotator-slide announce-slide ${idx === 0 ? 'active' : ''}`;
+                    div.innerHTML = item.html;
+                    announcePanel.appendChild(div);
                 });
             }
-
-            announceRotatorItems.forEach((item, idx) => {
-                let div = document.createElement('div');
-                div.className = `rotator-slide announce-slide ${idx === 0 ? 'active' : ''}`;
-                div.innerHTML = item.html;
-                announcePanel.appendChild(div);
-            });
         }
 
-        function rotateContent() {
+        /* TUKAR GAMBAR IKLAN SETIAP 10 SAAT */
+        function rotateImages() {
             const imageSlides = document.querySelectorAll('.image-slide');
-            if(imageSlides.length > 0) {
+            if (imageSlides.length > 1) {
                 imageSlides.forEach(s => s.classList.remove('active'));
                 imageIndex = (imageIndex + 1) % imageSlides.length;
                 imageSlides[imageIndex].classList.add('active');
             }
+        }
 
+        /* TUKAR AYAT QURAN & PENGUMUMAN SETIAP 30 SAAT */
+        function rotateTextPanels() {
             const quranSlides = document.querySelectorAll('.quran-slide');
-            if(quranSlides.length > 0) {
+            if (quranSlides.length > 1) {
                 quranSlides.forEach(s => s.classList.remove('active'));
                 quranIndex = (quranIndex + 1) % quranSlides.length;
                 quranSlides[quranIndex].classList.add('active');
             }
 
             const announceSlides = document.querySelectorAll('.announce-slide');
-            if(announceSlides.length > 0) {
+            if (announceSlides.length > 1) {
                 announceSlides.forEach(s => s.classList.remove('active'));
                 announceIndex = (announceIndex + 1) % announceSlides.length;
                 announceSlides[announceIndex].classList.add('active');
@@ -1047,12 +1143,15 @@
         }
 
         window.onload = async () => {
+            updateDashboardUI();
+            await fetchDirectWaktuSolatKDH03();
             await fetchDashboardData();
             
             setInterval(updateClockAndLogic, 1000);   
-            setInterval(rotateContent, 30000); 
-            setInterval(fetchDashboardData, 5000); 
-            setInterval(fetchDashboardData, 3600000); // REFRESH PAKSA WAKTU SOLAT DARI BACKEND SETIAP SEJAM
+            setInterval(rotateImages, 10000);               // Tukar gambar iklan setiap 10 saat
+            setInterval(rotateTextPanels, 30000);           // Tukar ayat Al-Quran & pengumuman setiap 30 saat
+            setInterval(fetchDashboardData, 5000);          // Kemaskini status pesakit setiap 5 saat
+            setInterval(fetchDirectWaktuSolatKDH03, 3600000); // Kemaskini waktu solat setiap 1 jam
         };
     </script>
 </body>
