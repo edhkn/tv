@@ -233,6 +233,7 @@
             z-index: 20;
         }
 
+        /* KOTAK GAMBAR & PAPARAN PANGGILAN PESAKIT */
         .image-slideshow-box {
             width: 40%;
             background-color: var(--bg-card-dark);
@@ -244,6 +245,18 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            transition: all 0.2s ease;
+        }
+
+        .image-slideshow-box.caller-active {
+            animation: caller-box-blink 0.65s infinite alternate;
+            border-width: 5px;
+        }
+
+        #slides-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
         }
 
         .image-slide {
@@ -267,6 +280,115 @@
             object-fit: contain;
             border-radius: 8px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+        }
+
+        /* LAPISAN OVERLAY PANGGILAN PESAKIT (10 SAAT) */
+        .caller-alert-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at center, #7f1d1d 0%, #180505 100%);
+            z-index: 30;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 16px;
+        }
+
+        .caller-alert-overlay.active {
+            display: flex;
+        }
+
+        .caller-badge {
+            background: var(--bright-red);
+            color: #ffffff;
+            padding: 6px 20px;
+            border-radius: 50px;
+            font-size: clamp(0.9rem, 1.3vw, 1.5rem);
+            font-weight: 900;
+            letter-spacing: 1px;
+            border: 2px solid #ffffff;
+            margin-bottom: 10px;
+            box-shadow: 0 0 15px var(--bright-red-glow);
+        }
+
+        .caller-label {
+            font-size: clamp(0.85rem, 1.15vw, 1.3rem);
+            font-weight: 800;
+            color: #fca5a5;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+
+        .caller-number {
+            font-size: clamp(3.5rem, 6.2vw, 7.2rem);
+            font-weight: 900;
+            color: var(--islamic-gold);
+            line-height: 1.05;
+            letter-spacing: 4px;
+            margin: 4px 0 10px 0;
+            animation: caller-text-blink 0.65s infinite alternate;
+        }
+
+        .caller-divider {
+            width: 75%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--hospital-blue), transparent);
+            margin: 6px 0 12px 0;
+        }
+
+        .caller-room {
+            font-size: clamp(1.8rem, 3vw, 3.6rem);
+            font-weight: 900;
+            color: #ffffff;
+            background: rgba(2, 132, 199, 0.35);
+            border: 3px solid var(--hospital-blue);
+            padding: 8px 28px;
+            border-radius: 14px;
+            margin-top: 6px;
+            animation: caller-room-blink 0.65s infinite alternate;
+        }
+
+        @keyframes caller-box-blink {
+            0% {
+                border-color: #ffffff;
+                box-shadow: 0 0 25px var(--bright-red), inset 0 0 20px rgba(255, 0, 51, 0.6);
+            }
+            100% {
+                border-color: var(--islamic-gold);
+                box-shadow: 0 0 35px var(--islamic-gold), inset 0 0 25px rgba(251, 191, 36, 0.5);
+            }
+        }
+
+        @keyframes caller-text-blink {
+            0% {
+                opacity: 1;
+                color: var(--islamic-gold);
+                text-shadow: 0 0 15px rgba(251, 191, 36, 0.9), 3px 3px 6px #000;
+                transform: scale(1);
+            }
+            100% {
+                opacity: 0.45;
+                color: #ffffff;
+                text-shadow: 0 0 25px #ffffff, 3px 3px 6px #000;
+                transform: scale(1.04);
+            }
+        }
+
+        @keyframes caller-room-blink {
+            0% {
+                background-color: rgba(255, 0, 51, 0.85);
+                border-color: #ffffff;
+                color: #ffffff;
+                box-shadow: 0 0 20px var(--bright-red-glow);
+            }
+            100% {
+                background-color: rgba(2, 132, 199, 0.45);
+                border-color: var(--islamic-gold);
+                color: var(--islamic-gold);
+                box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+            }
         }
 
         .bottom-section {
@@ -488,7 +610,7 @@
 
     <div id="audio-overlay">
         <h2 style="font-size: 2.2rem;">PAPAN PEMUKA TV UNIT KECEMASAN</h2>
-        <p style="font-size: 1.3rem; margin-top: 10px;">Sila tekan butang di bawah sekali sahaja untuk membolehkan audio/azan berbunyi automatik.</p>
+        <p style="font-size: 1.3rem; margin-top: 10px;">Sila tekan butang di bawah sekali sahaja untuk membolehkan audio/azan & loceng panggilan berbunyi automatik.</p>
         <button onclick="enableAudioSystem()">🚨 MULA DISPLAY & AKTIFKAN AUDIO</button>
     </div>
 
@@ -531,7 +653,18 @@
                 <div class="audio-indicator" id="audio-indicator">🔊 Sedang Memainkan Bacaan Al-Quran...</div>
             </div>
 
+            <!-- KOTAK GAMBAR + PAPARAN PANGGILAN PESAKIT -->
             <div class="image-slideshow-box" id="image-slideshow-box">
+                <div id="slides-container"></div>
+
+                <div class="caller-alert-overlay" id="caller-alert-overlay">
+                    <div class="caller-badge">🔔 PANGGILAN PESAKIT 🔔</div>
+                    <div class="caller-label">NOMBOR GILIRAN</div>
+                    <div class="caller-number" id="caller-display-number">0000</div>
+                    <div class="caller-divider"></div>
+                    <div class="caller-label">SILA MASUK KE</div>
+                    <div class="caller-room" id="caller-display-room">BILIK 1</div>
+                </div>
             </div>
         </div>
 
@@ -612,6 +745,12 @@
         let lastZikirHourPlayed = -1; 
         let currentDateString = ""; 
 
+        // PEMBOLEHUBAH PANGGILAN PESAKIT
+        let lastProcessedCallId = null;
+        let isFirstFetch = true;
+        let callerHideTimeout = null;
+        let audioCtx = null;
+
         function enableAudioSystem() {
             isAudioUnlocked = true;
             document.getElementById('audio-overlay').style.display = 'none';
@@ -624,6 +763,11 @@
             playDummyAudio(audioAzan);
             playDummyAudio(audioZikir);
 
+            try {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+            } catch (e) {}
+
             loadYouTubePlaylist();
         }
 
@@ -633,6 +777,64 @@
                 audioEl.pause();
                 audioEl.currentTime = 0;
             }).catch(() => {});
+        }
+
+        /* BUNYI LOCENG HOSPITAL (DING-DONG) APABILA MEMANGGIL PESAKIT */
+        function playHospitalChime() {
+            if (!isAudioUnlocked) return;
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+
+                const now = audioCtx.currentTime;
+                const notes = [659.25, 523.25]; // E5 -> C5 (Ding-Dong)
+
+                notes.forEach((freq, idx) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, now + idx * 0.45);
+
+                    gain.gain.setValueAtTime(0.001, now + idx * 0.45);
+                    gain.gain.exponentialRampToValueAtTime(0.45, now + idx * 0.45 + 0.05);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.45 + 0.9);
+
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+
+                    osc.start(now + idx * 0.45);
+                    osc.stop(now + idx * 0.45 + 0.95);
+                });
+            } catch (e) {
+                console.warn("Loceng tidak dapat dimainkan:", e);
+            }
+        }
+
+        /* PAPARKAN NOMBOR GILIRAN & BILIK BERKELIP SELAMA 10 SAAT DI KOTAK GAMBAR */
+        function showCallerOnImageBox(numberStr, roomStr) {
+            const box = document.getElementById('image-slideshow-box');
+            const overlay = document.getElementById('caller-alert-overlay');
+            const numEl = document.getElementById('caller-display-number');
+            const roomEl = document.getElementById('caller-display-room');
+
+            numEl.textContent = String(numberStr).padStart(4, '0');
+            roomEl.textContent = String(roomStr).toUpperCase();
+
+            box.classList.add('caller-active');
+            overlay.classList.add('active');
+
+            playHospitalChime();
+
+            if (callerHideTimeout) {
+                clearTimeout(callerHideTimeout);
+            }
+
+            // Kembali ke gambar-gambar semula selepas 10 saat (10000 ms)
+            callerHideTimeout = setTimeout(() => {
+                box.classList.remove('caller-active');
+                overlay.classList.remove('active');
+                callerHideTimeout = null;
+            }, 10000);
         }
 
         function parseUnixOrStringToMYT24(val) {
@@ -658,7 +860,6 @@
             return "00:00";
         }
 
-        /* PANGGILAN TERUS WAKTU SOLAT JAKIM (ZON KDH03 - PADANG TERAP / KUALA NERANG) */
         async function fetchDirectWaktuSolatKDH03() {
             const endpoints = [
                 `https://api.waktusolat.app/v2/solat/KDH03?_t=${Date.now()}`,
@@ -705,7 +906,6 @@
             return false;
         }
 
-        /* MEMANGGIL GOOGLE APPS SCRIPT TANPA MENGGANGGU SLIDESHOW JIKA TIADA PERUBAHAN GAMBAR */
         async function fetchDashboardData() {
             try {
                 if(GAS_WEB_APP_URL && !GAS_WEB_APP_URL.includes("INSERT_YOUR")) {
@@ -717,6 +917,22 @@
                     const data = await res.json();
                     
                     if(data) {
+                        // SEMAK PANGGILAN PESAKIT TERKINI
+                        if (data.latestCall && data.latestCall.callId) {
+                            const incomingId = String(data.latestCall.callId);
+                            if (isFirstFetch) {
+                                lastProcessedCallId = incomingId;
+                                // Jika panggilan dibuat kurang dari 10 saat sebelum page dibuka, terus paparkan
+                                if (Date.now() - Number(incomingId) < 10000) {
+                                    showCallerOnImageBox(data.latestCall.number, data.latestCall.room);
+                                }
+                            } else if (incomingId !== lastProcessedCallId) {
+                                lastProcessedCallId = incomingId;
+                                showCallerOnImageBox(data.latestCall.number, data.latestCall.room);
+                            }
+                        }
+                        isFirstFetch = false;
+
                         let isPlaylistChanged = data.youtubePlaylist && (data.youtubePlaylist !== dashboardData.youtubePlaylist);
                         dashboardData = Object.assign(dashboardData, data);
                         
@@ -803,7 +1019,6 @@
             checkAudioLogic(now);
         }
 
-        /* LOGIK PEMUTARAN AUDIO QURAN, AZAN & ZIKIR */
         function checkAudioLogic(now) {
             if(!isAudioUnlocked) return;
 
@@ -861,7 +1076,6 @@
                             let playPromise = audioQuran.play();
                             if (playPromise !== undefined) {
                                 playPromise.catch(error => {
-                                    console.warn(`Peringatan: Gagal memutarkan quran_${solatKey}.mp3.`, error);
                                     setTimeout(() => { audioQuran.play().catch(()=>{}); }, 1000);
                                 });
                             }
@@ -893,7 +1107,6 @@
                         let azanPromise = audioAzan.play();
                         if (azanPromise !== undefined) {
                             azanPromise.catch(error => {
-                                console.warn("Peringatan: Gagal memainkan Azan mp3. Mencuba semula...", error);
                                 setTimeout(() => { audioAzan.play().catch(()=>{}); }, 1000);
                             });
                         }
@@ -935,8 +1148,7 @@
 
             let zikirPromise = audioZikir.play();
             if (zikirPromise !== undefined) {
-                zikirPromise.catch(error => {
-                    console.warn(`Peringatan: Gagal memutarkan fail ${zikirFile}.`, error);
+                zikirPromise.catch(() => {
                     resetToVideoNormal();
                 });
             }
@@ -1034,7 +1246,7 @@
                 document.getElementById('val-obs').textContent = dashboardData.patients.observation || 0;
             }
 
-            // 1. SLIDESHOW GAMBAR DRIVE / POSTER (HANYA DIBINA SEMULA JIKA SENARAI GAMBAR BERUBAH)
+            // 1. SLIDESHOW GAMBAR DRIVE / POSTER
             let incomingImages = (Array.isArray(dashboardData.driveImages) && dashboardData.driveImages.length > 0)
                 ? dashboardData.driveImages
                 : ["https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https://www.facebook.com/share/199ijRaqcr/"];
@@ -1045,14 +1257,14 @@
                 driveImageItems = incomingImages;
                 imageIndex = 0;
 
-                const imageBox = document.getElementById('image-slideshow-box');
-                imageBox.innerHTML = '';
+                const slidesContainer = document.getElementById('slides-container');
+                slidesContainer.innerHTML = '';
 
                 driveImageItems.forEach((imgUrl, idx) => {
                     let div = document.createElement('div');
                     div.className = `image-slide ${idx === 0 ? 'active' : ''}`;
                     div.innerHTML = buildDriveImageTag(imgUrl);
-                    imageBox.appendChild(div);
+                    slidesContainer.appendChild(div);
                 });
             }
 
@@ -1073,7 +1285,7 @@
                     quranRotatorItems = shuffleArray(quranRotatorItems);
                 } else {
                     quranRotatorItems.push({
-                        html: `<h2>📖 AL-QURAN & HADITH</h2><div class="quran-arabic">وَإِذَا مَرِضْتُ فَهُوَ يَشْفِينِ</div><div class="quran-bm">Dan apabila aku sakit, Dialah yang menyembuhkan aku.</div>`
+                        html: `<h2>📖 AYAT SUCI AL-QURAN</h2><div class="quran-arabic">وَإِذَا مَرِضْتُ فَهُوَ يَشْفِينِ</div><div class="quran-bm">Dan apabila aku sakit, Dialah yang menyembuhkan aku.</div>`
                     });
                 }
 
@@ -1115,7 +1327,6 @@
             }
         }
 
-        /* TUKAR GAMBAR IKLAN SETIAP 10 SAAT */
         function rotateImages() {
             const imageSlides = document.querySelectorAll('.image-slide');
             if (imageSlides.length > 1) {
@@ -1125,7 +1336,6 @@
             }
         }
 
-        /* TUKAR AYAT QURAN & PENGUMUMAN SETIAP 30 SAAT */
         function rotateTextPanels() {
             const quranSlides = document.querySelectorAll('.quran-slide');
             if (quranSlides.length > 1) {
@@ -1148,9 +1358,9 @@
             await fetchDashboardData();
             
             setInterval(updateClockAndLogic, 1000);   
-            setInterval(rotateImages, 10000);               // Tukar gambar iklan setiap 10 saat
+            setInterval(rotateImages, 10000);               // Tukar gambar setiap 10 saat
             setInterval(rotateTextPanels, 30000);           // Tukar ayat Al-Quran & pengumuman setiap 30 saat
-            setInterval(fetchDashboardData, 5000);          // Kemaskini status pesakit setiap 5 saat
+            setInterval(fetchDashboardData, 2000);          // Semak panggilan pesakit & status setiap 2 saat
             setInterval(fetchDirectWaktuSolatKDH03, 3600000); // Kemaskini waktu solat setiap 1 jam
         };
     </script>
